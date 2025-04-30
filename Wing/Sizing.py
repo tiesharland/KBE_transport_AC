@@ -28,22 +28,22 @@ def solve_positive_root(a, b, c):
         if x > 0:
             return x
     return "No positive solution"
-s_TO = 1100  # m
+s_TO = 914  # m
 
-TOP = solve_positive_root(0.0577, 8.6726, s_TO)
+TOP = solve_positive_root(0.0577, 8.6726, (s_TO/0.3048))
 def take_off(CL_max_TO, TOP, sigma):
-    x = np.arange(1, 5000, 10)
-    y = (550 * TOP / x) * CL_max_TO * sigma
+    x = np.arange(1,7000, 10)
+    y = (TOP / x) * CL_max_TO * sigma
     return x, y
 
-s_landing = 550  # m
+s_landing = 762  # m
 f = 0.84 #From slides
 def landing(CL_max_landing, rho_SL, s_landing,f):
     x = (CL_max_landing * rho_SL * s_landing/0.5915)/2*f
     return x
 
 
-x_to, y_to = take_off(CL_max[1], TOP, sigma)
+x_to, y_to = take_off((CL_max[1]/1.1**2), TOP, sigma)
 ws_stall_clean = stall_speed(CL_max[0])
 ws_stall_TO = stall_speed(CL_max[1])
 ws_stall_landing = stall_speed(CL_max[2])
@@ -59,6 +59,7 @@ plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint
 plt.xlabel('W/S')
 plt.ylabel('W/P')
 plt.title('Constraint Diagram')
+plt.ylim(0, 0.4)
 plt.grid(True)
 plt.legend()
 plt.show()
