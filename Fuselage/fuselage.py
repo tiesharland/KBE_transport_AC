@@ -24,6 +24,10 @@ class Fuselage(GeomBase):
     def cargo_fuselage(self):
         return LoftedSurface(profiles=self.profiles, mesh_deflection=0.0001)
 
+    @Part
+    def test(self):
+        return
+
 if __name__ == "__main__":
     from parapy.gui import display
     fus = Fuselage(num_crates=2, num_vehicles=2, num_persons=9)
