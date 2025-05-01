@@ -26,9 +26,9 @@ class TailCone(GeomBase):
                       position=self.position.translate(x=child.index*self.tail_length,
                                                        z=child.index*self.end_offset).rotate90('y'))
 
-    @Part
-    def tailcone(self):
-        return LoftedSurface(profiles=self.profiles)
+    # @Part
+    # def tailcone(self):
+    #     return LoftedSurface(profiles=self.profiles)
 
 
 if __name__ == "__main__":

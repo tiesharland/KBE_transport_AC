@@ -15,37 +15,37 @@ class Cargo(GeomBase):
 
     @Part
     def crates(self):
-        return Crates(num_crates=self.num_crates)
+        return Crates(num_crates=self.num_crates, position=self.position.translate(z=self.offset))
 
     @Part
     def vehicles(self):
-        return Vehicles(num_vehicles=self.num_vehicles, position=self.position.translate(x=self.crates.length))
+        return Vehicles(num_vehicles=self.num_vehicles, position=self.position.translate(x=self.crates.length, z=self.offset))
 
     @Part
     def personnel(self):
         return Personnel(num_persons=self.num_persons,
-                         position=self.position.translate(x=self.crates.length+self.vehicles.length))
+                         position=self.position.translate(x=self.crates.length+self.vehicles.length, z=self.offset))
 
     @Attribute
-    def total_length(self):
+    def length(self):
         return self.vehicles.length + self.crates.length + self.personnel.length
 
     @Attribute
-    def max_height(self):
+    def height(self):
         return max((self.vehicles.height, self.crates.height, self.personnel.height))
 
     @Attribute
-    def max_width(self):
+    def width(self):
         return max((self.vehicles.width, self.crates.width, self.personnel.width))
 
     @Attribute
     def minimum_circle(self):
-        half_width = self.max_width / 2
+        half_width = self.width / 2
         points = [
             (half_width, 0),
             (-half_width, 0),
-            (half_width, self.max_height),
-            (-half_width, self.max_height)
+            (half_width, self.height),
+            (-half_width, self.height)
         ]
 
         def max_distance(zc):
@@ -55,6 +55,19 @@ class Cargo(GeomBase):
         ofset = res.x
         radius = max_distance(res.x)
         return ofset, radius
+
+    @Attribute
+    def radius(self):
+        return self.minimum_circle[1]
+
+    @Attribute
+    def offset(self):
+        return -1 * self.minimum_circle[0]
+
+    @Part
+    def profiles(self):
+        return Circle(position=self.position.translate(x=(self.length*child.index)).rotate90('y'),
+                      radius=self.radius, quantify=2)
 
 
 if __name__ == "__main__":
