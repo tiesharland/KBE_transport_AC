@@ -1,7 +1,8 @@
 from parapy.core import *
 from parapy.geom import *
+from Fuselage.cargo import Cargo
 from Fuselage.nosecone import NoseCone
-from cargo import Cargo
+from Fuselage.tailcone import TailCone
 
 
 class Fuselage(GeomBase):
@@ -9,6 +10,8 @@ class Fuselage(GeomBase):
     num_vehicles = Input()
     num_persons = Input()
     nose_fineness = Input(1.2)
+    tail_fineness = Input(3)
+    divergence_angle = Input(18)
 
     @Attribute
     def nose_length(self):
@@ -39,6 +42,11 @@ class Fuselage(GeomBase):
     @Part
     def nosecone(self):
         return NoseCone(radius=self.radius, nose_fineness=self.nose_fineness, position=self.position)
+
+    @Part
+    def tailcone(self):
+        return TailCone(radius=self.radius, tail_fineness=self.tail_fineness, divergence_angle=self.divergence_angle,
+                        position=self.position.translate(x=self.nose_length+self.cargo.total_length))
 
 
 if __name__ == "__main__":
