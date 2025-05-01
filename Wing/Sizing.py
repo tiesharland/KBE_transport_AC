@@ -21,11 +21,11 @@ s_landing = 762  # m
 #Fuel fraction
 f = 0.84 #From slides
 #Cruise conditions
-h_cr = 7500 #[m]
+h_cr = 8535 #[m]
 CD0 =0.0280 #This is incorrect for now
 A = 10.1
-e =0.78 #Incorrect
-eta_p = 0.99 #Incorrect
+e = 0.75 #Incorrect
+eta_p = 0.9 #Incorrect
 V_cr = 150
 
 
@@ -76,8 +76,13 @@ def isa_density(h_cr):
 
 rho = isa_density(h_cr)
 def cruise(CD0, A, e, eta_p, rho, V_cr, rho_SL):
-    x = np.arange(1, 7000, 10)  # Wing loading W/S [N/m²]
-    y = eta_p * (rho/rho_SL)**(3/4) * (( (CD0 * 1/2 * rho * V_cr**3)/x) +  (x/ np.pi * A * e * rho * V_cr)) ** (-1)
+    x = np.arange(100, 7000, 10)
+
+    term1 = (CD0 * 1/2 * rho * V_cr**3)/x
+    term2 = x/ (np.pi * A * e *1/2 * rho * V_cr)
+    bracket_term = term1 + term2
+
+    y = eta_p * (rho / rho_SL)**(3/4) * (1 / bracket_term)
     return x, y
 
 #Take off requirement
@@ -92,11 +97,11 @@ ws_landing = landing(CL_max[2], rho_SL, s_landing, f)
 x_cr, y_cr = cruise(CD0,A,e,eta_p,rho,V_cr,rho_SL)
 
 
-# plt.plot(x_to, y_to, label='Take-off Constraint', color='blue')
-# plt.axvline(ws_stall_clean, color='red', linestyle='--', label=f'Stall (CLmax={CL_max[0]})')
-# plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={CL_max[1]})')
-# plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLmax={CL_max[2]})')
-# plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
+plt.plot(x_to, y_to, label='Take-off Constraint', color='blue')
+plt.axvline(ws_stall_clean, color='red', linestyle='--', label=f'Stall (CLmax={CL_max[0]})')
+plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={CL_max[1]})')
+plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLmax={CL_max[2]})')
+plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
 plt.plot(x_cr, y_cr, label='Cruise Constraint', color='red')
 
 
