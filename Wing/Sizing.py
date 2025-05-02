@@ -77,7 +77,7 @@ def isa_density(h_cr):
 
 rho = isa_density(h_cr)
 def cruise(CD0, A, e, eta_p, rho, V_cr, rho_SL):
-    x = np.arange(100, 7000, 10)
+    x = np.arange(1, 7000, 10)
 
     term1 = (CD0 * 1/2 * rho * V_cr**3)/x
     term2 = x/ (np.pi * A * e *1/2 * rho * V_cr)
@@ -98,15 +98,17 @@ ws_landing = landing(CL_max[2], rho_SL, s_landing, f)
 #Cruise requirement
 x_cr, y_cr = cruise(CD0,A,e,eta_p,rho,V_cr,rho_SL)
 
-vertical_limit = np.min([ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing])
-vertical_line = LineString(np.column_stack((vertical_limit * np.ones(1000), np.linspace(0, 0.40, 1000))))
-cruise_line = LineString(np.column_stack((x_cr, y_cr)))
-to_line = LineString(np.column_stack((x_to, y_to)))
-cruise_intersect = cruise_line.intersection(vertical_line)
-to_intersect = to_line.intersection(vertical_line)
-y_opt = np.min((cruise_intersect.y, to_intersect.y))
+def design_point(ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing,x_cr,y_cr,x_to,y_to):
+    vertical_limit = np.min([ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing])
+    vertical_line = LineString(np.column_stack((vertical_limit * np.ones(1000), np.linspace(0, 0.40, 1000))))
+    cruise_line = LineString(np.column_stack((x_cr, y_cr)))
+    to_line = LineString(np.column_stack((x_to, y_to)))
+    cruise_intersect = cruise_line.intersection(vertical_line)
+    to_intersect = to_line.intersection(vertical_line)
+    y_opt = np.min((cruise_intersect.y, to_intersect.y))
+    return vertical_limit, y_opt
 
-
+vertical_limit, y_opt = design_point(ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing,x_cr,y_cr,x_to,y_to)
 plt.plot(x_to, y_to, label='Take-off Constraint', color='blue')
 plt.axvline(ws_stall_clean, color='red', linestyle='--', label=f'Stall (CLmax={CL_max[0]})')
 plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={CL_max[1]})')
@@ -114,8 +116,6 @@ plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLm
 plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
 plt.plot(x_cr, y_cr, label='Cruise Constraint', color='red')
 plt.scatter(vertical_limit, y_opt, marker='*')
-
-
 plt.xlabel('W/S')
 plt.ylabel('W/P')
 plt.title('Constraint Diagram')
@@ -124,3 +124,6 @@ plt.grid(True)
 plt.legend()
 plt.show()
 
+
+print(f"Optimal W/S ={vertical_limit}")
+print(f"Optimal W/P ={y_opt}")
