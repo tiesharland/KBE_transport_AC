@@ -113,7 +113,7 @@ plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={C
 plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLmax={CL_max[2]})')
 plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
 plt.plot(x_cr, y_cr, label='Cruise Constraint', color='red')
-plt.scatter(vertical_limit, y_opt, marker='*')
+plt.scatter(vertical_limit, y_opt, marker='*', s=200, color='black')
 
 
 plt.xlabel('W/S')
