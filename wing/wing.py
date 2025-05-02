@@ -1,8 +1,8 @@
 from math import sqrt, radians, tan, pi
 from parapy.core import *
 from parapy.geom import *
-from wing.airfoil import Airfoil
-from wing.Sizing import calculate_optimal_point
+from Wing.airfoil import Airfoil
+from Wing.Sizing import calculate_optimal_point
 
 
 class Wing(GeomBase):
