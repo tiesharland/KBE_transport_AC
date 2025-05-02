@@ -23,6 +23,7 @@ s_landing = 762  # m
 f = 0.84 #From slides
 #Cruise conditions
 h_cr = 8535 #[m]
+
 CD0 =0.0280 #This is incorrect for now
 A = 10.1
 e = 0.75 #Incorrect
