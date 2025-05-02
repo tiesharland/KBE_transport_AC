@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')  # or 'Qt5Agg' if you have it
 import matplotlib.pyplot as plt
+from shapely.geometry import LineString
 
 
 #Assumed constants
@@ -85,6 +86,7 @@ def cruise(CD0, A, e, eta_p, rho, V_cr, rho_SL):
     y = eta_p * (rho / rho_SL)**(3/4) * (1 / bracket_term)
     return x, y
 
+
 #Take off requirement
 x_to, y_to = take_off((CL_max[1]/1.1**2), TOP, sigma)
 #Stall requirement
@@ -96,6 +98,14 @@ ws_landing = landing(CL_max[2], rho_SL, s_landing, f)
 #Cruise requirement
 x_cr, y_cr = cruise(CD0,A,e,eta_p,rho,V_cr,rho_SL)
 
+vertical_limit = np.min([ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing])
+vertical_line = LineString(np.column_stack((vertical_limit * np.ones(1000), np.linspace(0, 0.40, 1000))))
+cruise_line = LineString(np.column_stack((x_cr, y_cr)))
+to_line = LineString(np.column_stack((x_to, y_to)))
+cruise_intersect = cruise_line.intersection(vertical_line)
+to_intersect = to_line.intersection(vertical_line)
+y_opt = np.min((cruise_intersect.y, to_intersect.y))
+
 
 plt.plot(x_to, y_to, label='Take-off Constraint', color='blue')
 plt.axvline(ws_stall_clean, color='red', linestyle='--', label=f'Stall (CLmax={CL_max[0]})')
@@ -103,6 +113,7 @@ plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={C
 plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLmax={CL_max[2]})')
 plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
 plt.plot(x_cr, y_cr, label='Cruise Constraint', color='red')
+plt.scatter(vertical_limit, y_opt, marker='*')
 
 
 plt.xlabel('W/S')
