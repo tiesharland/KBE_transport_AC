@@ -18,8 +18,16 @@ class Fuselage(GeomBase):
         return self.nose_fineness * self.radius * 2
 
     @Attribute
+    def tail_length(self):
+        return self.tail_fineness * self.radius * 2
+
+    @Attribute
     def radius(self):
         return self.cargo.radius
+
+    @Attribute
+    def length(self):
+        return self.cargo.length + self.nose_length + self.tail_length
 
     @Part
     def cargo(self):

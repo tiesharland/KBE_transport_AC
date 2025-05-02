@@ -1,1 +1,0 @@
-from .airfoil import Airfoil

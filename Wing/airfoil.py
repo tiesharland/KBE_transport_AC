@@ -4,8 +4,8 @@ from kbeutils.geom import Naca4AirfoilCurve, Naca5AirfoilCurve
 
 
 class Airfoil(GeomBase):
-    root_airfoil_name = Input()
-    root_chord = Input()
+    airfoil_name = Input()
+    chord = Input()
 
     @Part
     def airfoil(self):
@@ -15,7 +15,6 @@ class Airfoil(GeomBase):
     @Part
     def profile(self):
         return ScaledCurve(curve_in=self.airfoil, reference_point=self.position.point, factor=self.chord)
-
 
 if __name__ == '__main__':
     from parapy.gui import display

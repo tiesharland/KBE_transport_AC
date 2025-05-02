@@ -23,7 +23,7 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
     #Fuel fraction
     f = 0.84 #From slides
 
-    CD0 =0.021 #ADSEE I lec 6
+    CD0 = 0.021 #ADSEE I lec 6
     e = 0.825 #ADSEE I lec 6
     eta_p = 0.82 #ADSEE I lec 6
 
@@ -45,7 +45,7 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
         discriminant = b**2 - 4 * a * (-c)
         if discriminant < 0:
             return "No real solution"
-        sqrt_disc = np.sqrt(discriminant)  # FIXED
+        sqrt_disc = np.sqrt(discriminant)
         x1 = (-b + sqrt_disc) / (2 * a)
         x2 = (-b - sqrt_disc) / (2 * a)
         for x in [x1, x2]:
@@ -139,4 +139,4 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
 
 
 if __name__ == "__main__":
-    calculate_optimal_point(914, 762, 8535, 150)
+    calculate_optimal_point(s_TO=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1)
