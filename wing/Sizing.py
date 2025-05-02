@@ -1,0 +1,142 @@
+from typing import Any
+
+from parapy.core import *
+from parapy.geom import *
+from math import *
+import numpy as np
+
+import matplotlib
+matplotlib.use('TkAgg')  # or 'Qt5Agg' if you have it
+import matplotlib.pyplot as plt
+from shapely.geometry import LineString
+
+
+def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
+                            A: int, plotting: int = True) -> tuple[float, float]:
+
+    #Assumed constants
+    CL_max = [1.5, 1.9, 2.4]  # clean, TO, landing
+    rho_SL = 1.225
+    #Stall speed
+    V_s = 52  # [m/s] from C130 datasheet
+    sigma = 1  # density ratio
+    #Fuel fraction
+    f = 0.84 #From slides
+
+    CD0 =0.021 #ADSEE I lec 6
+    e = 0.825 #ADSEE I lec 6
+    eta_p = 0.82 #ADSEE I lec 6
+
+    # #Inputs
+    # # Cruise conditions
+    # h_cr = 8535  # [m]
+    # V_cr = 150
+    # #Take-off distance
+    # s_TO = 914  # m
+    # #Landing distance
+    # s_landing = 762  # m
+
+    # Stall speed W/S computation
+    def stall_speed(CL_max):
+        x = 0.5 * rho_SL * V_s**2 * CL_max
+        return x
+
+    def solve_positive_root(a, b, c):
+        discriminant = b**2 - 4 * a * (-c)
+        if discriminant < 0:
+            return "No real solution"
+        sqrt_disc = np.sqrt(discriminant)  # FIXED
+        x1 = (-b + sqrt_disc) / (2 * a)
+        x2 = (-b - sqrt_disc) / (2 * a)
+        for x in [x1, x2]:
+            if x > 0:
+                return x
+        return "No positive solution"
+
+    TOP = solve_positive_root(0.0577, 8.6726, (s_TO/0.3048))
+    def take_off(CL_max_TO, TOP, sigma):
+        x = np.arange(1,7000, 10)
+        y = (TOP / x) * CL_max_TO * sigma
+        return x, y
+
+
+    def landing(CL_max_landing, rho_SL, s_landing,f):
+        x = (CL_max_landing * rho_SL * s_landing/0.5915)/2*f
+        return x
+
+
+    def isa_density(h_cr):
+        # Constants
+        T0 = 288.15  # Sea level standard temperature [K]
+        L = 0.0065  # Temperature lapse rate [K/m]
+        g0 = 9.80665  # Gravitational acceleration [m/s²]
+        R = 287.058  # Specific gas constant for dry air [J/kg·K]
+        rho_SL = 1.225
+
+        if h_cr < 0 or h_cr > 11000:
+            raise ValueError("Altitude must be within 0–11000 meters.")
+
+        rho = ((1 + (L * h_cr / T0)) ** - (g0 / (R * L) + 1) ) * rho_SL
+
+        return rho
+
+    rho = isa_density(h_cr)
+    def cruise(CD0, A, e, eta_p, rho, V_cr, rho_SL):
+        x = np.arange(1, 7000, 10)
+
+        term1 = (CD0 * 1/2 * rho * V_cr**3)/x
+        term2 = x/ (np.pi * A * e *1/2 * rho * V_cr)
+        bracket_term = term1 + term2
+
+        y = eta_p * (rho / rho_SL)**(3/4) * (1 / bracket_term)
+        return x, y
+
+
+    #Take off requirement
+    x_to, y_to = take_off((CL_max[1]/1.1**2), TOP, sigma)
+    #Stall requirement
+    ws_stall_clean = stall_speed(CL_max[0])
+    ws_stall_TO = stall_speed(CL_max[1])
+    ws_stall_landing = stall_speed(CL_max[2])
+    #Landing requirement
+    ws_landing = landing(CL_max[2], rho_SL, s_landing, f)
+    #Cruise requirement
+    x_cr, y_cr = cruise(CD0,A,e,eta_p,rho,V_cr,rho_SL)
+
+    def design_point(ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing,x_cr,y_cr,x_to,y_to):
+        vertical_limit = np.min([ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing])
+        vertical_line = LineString(np.column_stack((vertical_limit * np.ones(1000), np.linspace(0, 0.40, 1000))))
+        cruise_line = LineString(np.column_stack((x_cr, y_cr)))
+        to_line = LineString(np.column_stack((x_to, y_to)))
+        cruise_intersect = cruise_line.intersection(vertical_line)
+        to_intersect = to_line.intersection(vertical_line)
+        y_opt = np.min((cruise_intersect.y, to_intersect.y))
+        return vertical_limit, y_opt
+
+    vertical_limit, y_opt = design_point(ws_stall_clean, ws_stall_TO, ws_stall_landing, ws_landing, x_cr, y_cr, x_to, y_to)
+
+    if plotting:
+        plt.plot(x_to, y_to, label='Take-off Constraint', color='blue')
+        plt.axvline(ws_stall_clean, color='red', linestyle='--', label=f'Stall (CLmax={CL_max[0]})')
+        plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={CL_max[1]})')
+        plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLmax={CL_max[2]})')
+        plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
+        plt.plot(x_cr, y_cr, label='Cruise Constraint', color='red')
+        plt.scatter(vertical_limit, y_opt, marker='*', s=200, color='black')
+        plt.xlabel('W/S')
+        plt.ylabel('W/P')
+        plt.title('Constraint Diagram')
+        plt.ylim(0, 0.4)
+        plt.grid(True)
+        plt.legend()
+        plt.show()
+
+
+        print(f"Optimal W/S ={vertical_limit}")
+        print(f"Optimal W/P ={y_opt}")
+
+    return vertical_limit, y_opt
+
+
+if __name__ == "__main__":
+    calculate_optimal_point(914, 762, 8535, 150)

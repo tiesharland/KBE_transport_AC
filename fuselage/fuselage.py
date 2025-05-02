@@ -1,8 +1,8 @@
 from parapy.core import *
 from parapy.geom import *
-from Fuselage.cargo import Cargo
-from Fuselage.nosecone import NoseCone
-from Fuselage.tailcone import TailCone
+from fuselage.cargo import Cargo
+from fuselage.nosecone import NoseCone
+from fuselage.tailcone import TailCone
 
 
 class Fuselage(GeomBase):
