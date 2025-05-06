@@ -4,7 +4,7 @@ import numpy as np
 from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
-
+from Wing.airfoil import Airfoil
 
 class Aircraft(GeomBase):
     num_crates = Input()
@@ -16,7 +16,8 @@ class Aircraft(GeomBase):
     h_cr = Input()
     V_cr = Input()
     A = Input()
-    airfoil_name = Input()
+    airfoil_name_root = Input()
+    airfoil_name_tip = Input()
     N_engines = Input()
     root_le = Input()
 
@@ -32,8 +33,9 @@ class Aircraft(GeomBase):
 
     @Part
     def wing(self):
-        return Wing(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, airfoil_name',
-                    position=self.position.translate(x=self.root_le*self.fuselage.cargo.length, z=self.fuselage.radius-self.wing.thickness_root))
+        return Wing(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip',
+                    position=self.position.translate(x=self.root_le*self.fuselage.cargo.length, z=self.fuselage.radius))
+
 
     @Part
     def propulsion(self):
@@ -44,6 +46,6 @@ class Aircraft(GeomBase):
 if __name__ == '__main__':
     from parapy.gui import display
     cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9,
-                     mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, airfoil_name='64318',
+                     mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412'
                      N_engines=4, root_le=0.4)
     display(cargo)

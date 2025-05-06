@@ -12,7 +12,9 @@ class Wing(GeomBase):
     h_cr = Input()
     V_cr = Input()
     A = Input()
-    airfoil_name = Input()
+    airfoil_name_root = Input()
+    airfoil_name_tip = Input()
+
 
     @Attribute
     def surface(self):
@@ -57,16 +59,16 @@ class Wing(GeomBase):
 
     @Part
     def root_airfoil(self):
-        return Airfoil(airfoil_name=self.airfoil_name, chord=self.root_chord, position=self.position)
+        return Airfoil(airfoil_name=self.airfoil_name_root, chord=self.root_chord, position=self.position)
 
     @Part
     def tip_airfoil(self):
-        return Airfoil(airfoil_name=self.airfoil_name, chord=self.tip_chord,
+        return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=self.tip_le_offset, y=self.span/2))
 
     @Part
     def tip_mirrored(self):
-        return Airfoil(airfoil_name=self.airfoil_name, chord=self.tip_chord,
+        return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=(self.root_chord-self.tip_chord)/4, y=self.span/-2))
 
     @Part
@@ -78,5 +80,5 @@ class Wing(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    wing = Wing(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, airfoil_name='64318')
+    wing = Wing(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip = '64412')
     display(wing)
