@@ -42,6 +42,14 @@ class Wing(GeomBase):
         return (2 * self.surface) / (1 + self.taper_ratio) / self.span
 
     @Attribute
+    def local_chord(self):
+        return self.root_chord - ((self.root_chord - self.tip_chord)/(self.span /2)) * (0.85 * self.span/2)
+
+    @Attribute
+    def thickness_local_chord(self):
+        return (self.thickness_ratio / 100) * self.local_chord
+
+    @Attribute
     def tip_chord(self):
         return self.root_chord * self.taper_ratio
 
@@ -51,7 +59,7 @@ class Wing(GeomBase):
 
     @Attribute
     def thickness_ratio(self):
-        return int(self.airfoil_name[-2:])
+        return int(self.airfoil_name_root[-2:])
 
     @Attribute
     def thickness_root(self):
@@ -65,6 +73,7 @@ class Wing(GeomBase):
     def tip_airfoil(self):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=self.tip_le_offset, y=self.span/2))
+
 
     @Part
     def tip_mirrored(self):

@@ -4,7 +4,6 @@ import numpy as np
 from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
-from Wing.airfoil import Airfoil
 
 class Aircraft(GeomBase):
     num_crates = Input()
@@ -46,6 +45,6 @@ class Aircraft(GeomBase):
 if __name__ == '__main__':
     from parapy.gui import display
     cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9,
-                     mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412',
+                     mtow=70307*9.81, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412',
                      N_engines=4, root_le=0.4)
     display(cargo)
