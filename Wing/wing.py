@@ -80,5 +80,5 @@ class Wing(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    wing = Wing(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip = '64412')
+    wing = Wing(mtow=70307*9.81, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip = '64412')
     display(wing)

@@ -8,7 +8,7 @@ class Crates(GeomBase):
     single_length = Input(2.70)
     single_width = Input(2.20)
     single_height = Input(2.44)
-    single_mass = 4500
+    single_mass = Input(4500)
 
     @Attribute
     def height(self):

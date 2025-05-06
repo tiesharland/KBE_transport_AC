@@ -22,10 +22,9 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
     sigma = 1  # density ratio
     #Fuel fraction
     f = 0.84 #From slides
-
-    CD0 = 0.021 #ADSEE I lec 6
-    e = 0.825 #ADSEE I lec 6
-    eta_p = 0.82 #ADSEE I lec 6
+    CD0 = 0.035 #ADSEE I lec 2
+    e = 0.9 #ADSEE I lec 2
+    eta_p = 0.82 #ADSEE I lec 2
 
     # #Inputs
     # # Cruise conditions
@@ -61,7 +60,7 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
 
 
     def landing(CL_max_landing, rho_SL, s_landing,f):
-        x = (CL_max_landing * rho_SL * s_landing/0.5915)/2*f
+        x = (CL_max_landing * rho_SL * s_landing/0.5915)/(2*f)
         return x
 
 
@@ -84,16 +83,16 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
     def cruise(CD0, A, e, eta_p, rho, V_cr, rho_SL):
         x = np.arange(1, 7000, 10)
 
-        term1 = (CD0 * 1/2 * rho * V_cr**3)/x
-        term2 = x/ (np.pi * A * e *1/2 * rho * V_cr)
-        bracket_term = term1 + term2
+        term1 = (CD0 * 0.5 * rho * V_cr ** 3) / x
+        term2 = (x / (np.pi * A * e)) * (1 / (0.5 * rho * V_cr))
 
-        y = eta_p * (rho / rho_SL)**(3/4) * (1 / bracket_term)
+        # Full expression
+        y = eta_p * (rho / rho_SL) ** (3 / 4) * (term1 + term2) ** (-1)
         return x, y
 
 
     #Take off requirement
-    x_to, y_to = take_off((CL_max[1]/1.1**2), TOP, sigma)
+    x_to, y_to = take_off((CL_max[1]/(1.1**2)), TOP, sigma)
     #Stall requirement
     ws_stall_clean = stall_speed(CL_max[0])
     ws_stall_TO = stall_speed(CL_max[1])
@@ -139,4 +138,4 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
 
 
 if __name__ == "__main__":
-    calculate_optimal_point(s_TO=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1)
+    calculate_optimal_point(s_TO=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, plotting = True)
