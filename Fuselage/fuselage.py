@@ -29,6 +29,10 @@ class Fuselage(GeomBase):
     def length(self):
         return self.cargo.length + self.nose_length + self.tail_length
 
+    @Attribute
+    def fineness(self):
+        return self.length / self.radius / 2
+
     @Part
     def cargo(self):
         return Cargo(pass_down='num_crates, num_vehicles, num_persons',
