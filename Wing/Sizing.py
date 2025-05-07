@@ -22,6 +22,7 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
     sigma = 1  # density ratio
     #Fuel fraction
     f = 0.84 #From slides
+
     CD0 = 0.035 #ADSEE I lec 2
     e = 0.9 #ADSEE I lec 2
     eta_p = 0.82 #ADSEE I lec 2
