@@ -57,8 +57,12 @@ class Cargo(GeomBase):
         return ofset, radius
 
     @Attribute
-    def radius(self):
+    def inner_radius(self):
         return self.minimum_circle[1]
+
+    @Attribute
+    def outer_radius(self):
+        return (self.inner_radius * 1.045 * 2 + 0.084) / 2
 
     @Attribute
     def offset(self):
@@ -67,7 +71,7 @@ class Cargo(GeomBase):
     @Part
     def profiles(self):
         return Circle(position=self.position.translate(x=(self.length*child.index)).rotate90('y'),
-                      radius=self.radius, quantify=2)
+                      radius=self.outer_radius, quantify=2)
 
 
 if __name__ == "__main__":

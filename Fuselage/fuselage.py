@@ -23,7 +23,7 @@ class Fuselage(GeomBase):
 
     @Attribute
     def radius(self):
-        return self.cargo.radius
+        return self.cargo.outer_radius
 
     @Attribute
     def length(self):
@@ -32,6 +32,10 @@ class Fuselage(GeomBase):
     @Attribute
     def fineness(self):
         return self.length / self.radius / 2
+
+    # @fineness.validator
+    # def fineness_validator(self, value):
+    #     if value >
 
     @Part
     def cargo(self):
