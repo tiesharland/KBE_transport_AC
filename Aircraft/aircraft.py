@@ -35,7 +35,6 @@ class Aircraft(GeomBase):
         return Wing(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip',
                     position=self.position.translate(x=self.root_le*self.fuselage.cargo.length, z=self.fuselage.radius))
 
-
     @Part
     def propulsion(self):
         return Engines(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span,

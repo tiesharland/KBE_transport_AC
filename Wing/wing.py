@@ -65,6 +65,10 @@ class Wing(GeomBase):
     def thickness_root(self):
         return (self.thickness_ratio / 100) * self.root_chord
 
+    @Attribute
+    def MAC(self):
+        return 2/3 * self.root_chord * (1 + self.taper_ratio + self.taper_ratio**2) / (1 + self.taper_ratio)
+
     @Part
     def root_airfoil(self):
         return Airfoil(airfoil_name=self.airfoil_name_root, chord=self.root_chord, position=self.position)
@@ -82,7 +86,7 @@ class Wing(GeomBase):
 
     @Part
     def wing(self):
-        return RuledShell(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile])
+        return LoftedSurface(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile])
 
 
     @Part
