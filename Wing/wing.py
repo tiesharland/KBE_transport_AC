@@ -87,7 +87,8 @@ class Wing(GeomBase):
 
     @Part
     def fueltank(self):
-        return FuelTank(root_chord = self.root_chord, thickness_root = self.thickness_root)
+        return FuelTank(airfoil_name_root=self.airfoil_name_root,airfoil_name_tip=self.airfoil_name_tip,root_chord=self.root_chord,tip_chord=self.tip_chord,span=self.span)
+
 
 if __name__ == '__main__':
     from parapy.gui import display
