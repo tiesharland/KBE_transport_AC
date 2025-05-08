@@ -6,10 +6,11 @@ from kbeutils.geom import Naca4AirfoilCurve, Naca5AirfoilCurve
 
 class FuelTank(GeomBase):
     airfoil_name_root = Input()
-    airfoil_name_tip = Input ()
+    airfoil_name_tip = Input()
     root_chord = Input()
     tip_chord = Input()
     span = Input()
+
     @Part
     def root_airfoil(self):
         return DynamicType(
@@ -53,7 +54,6 @@ class FuelTank(GeomBase):
     def trimmed_root(self):
         return Polyline(points=[Point(x, y, z) for x, y, z in self.scaled_root_coords], close=True)
 
-
     @Part
     def tip_airfoil(self):
         return DynamicType(
@@ -92,12 +92,14 @@ class FuelTank(GeomBase):
             [x * self.tip_chord +(self.root_chord-self.tip_chord)/4 , y * self.tip_chord + self.span / 2, z * self.tip_chord]
             for x, y, z in self.closed_trimmed_coords_tip
         ])
+
     @Attribute
     def scaled_translated_tip_coords_mirrored(self):
         return np.array([
             [x * self.tip_chord+(self.root_chord-self.tip_chord)/4, y * self.tip_chord - self.span / 2, z * self.tip_chord]
             for x, y, z in self.closed_trimmed_coords_tip
         ])
+
     @Part
     def trimmed_tip(self):
         return Polyline(points=[Point(x, y, z) for x, y, z in self.scaled_translated_tip_coords], close=True)
@@ -106,7 +108,6 @@ class FuelTank(GeomBase):
     def trimmed_tip_mirrored(self):
         return Polyline(points=[Point(x, y, z) for x, y, z in self.scaled_translated_tip_coords_mirrored], close=True)
 
-
     @Part
     def fuel_tank_surface_inner(self):
         return LoftedShell(profiles=[self.trimmed_root, self.trimmed_tip])
@@ -114,6 +115,7 @@ class FuelTank(GeomBase):
     @Part
     def fuel_tank_surface_outer(self):
         return LoftedShell(profiles=[self.trimmed_tip_mirrored,self.trimmed_root])
+
     @Part
     def root_face(self):
         return Face(island=self.trimmed_root)
