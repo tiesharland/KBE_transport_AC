@@ -3,3 +3,4 @@
 *.xml
 Wing/__pycache__/airfoil.cpython-311.pyc
 *.pyc
+__pycache__/

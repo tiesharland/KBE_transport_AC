@@ -89,7 +89,7 @@ class FuelTank(GeomBase):
     @Attribute
     def scaled_translated_tip_coords(self):
         return np.array([
-            [x * self.tip_chord +(self.root_chord-self.tip_chord)/4 , y * self.tip_chord + self.span / 2, z * self.tip_chord]
+            [x * self.tip_chord +(self.root_chord-self.tip_chord)/4, y * self.tip_chord + self.span / 2, z * self.tip_chord]
             for x, y, z in self.closed_trimmed_coords_tip
         ])
 
