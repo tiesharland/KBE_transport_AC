@@ -4,6 +4,7 @@ import numpy as np
 from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
+from Tail.tail import Tail
 
 class Aircraft(GeomBase):
     num_crates = Input()
@@ -19,6 +20,9 @@ class Aircraft(GeomBase):
     airfoil_name_tip = Input()
     N_engines = Input()
     root_le = Input()
+    horizontal_airfoil = Input()
+    vertical_airfoil = Input()
+    X_CG = Input()
 
     @Attribute
     def engine_attachment(self):
@@ -40,10 +44,16 @@ class Aircraft(GeomBase):
         return Engines(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span,
                        position=self.wing.position)
 
+    @Part
+    def empennage(self):
+        return Tail(pass_down='horizontal_airfoil,vertical_airfoil,X_CG',length=self.fuselage.length,MAC=self.wing.MAC,surface=self.wing.surface,span=self.wing.span,
+                position=self.position.translate(x=0.75*self.fuselage.length, z=self.fuselage.radius))
+
 
 if __name__ == '__main__':
     from parapy.gui import display
     cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9,
                      mtow=70307*9.81, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412',
-                     N_engines=4, root_le=0.4)
+                     N_engines=4, root_le=0.4,
+                     horizontal_airfoil='0018',vertical_airfoil='0018',X_CG=4)
     display(cargo)

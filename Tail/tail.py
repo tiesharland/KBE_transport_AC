@@ -9,7 +9,7 @@ class Tail(GeomBase):
     horizontal_airfoil = Input()
     vertical_airfoil = Input()
     X_CG = Input()
-    Fuselage_length = Input()
+    length = Input()
     MAC = Input()
     surface = Input()
     span = Input()
@@ -45,7 +45,7 @@ class Tail(GeomBase):
         return 1
     @Attribute
     def X_h(self):
-        return 0.9 * self.Fuselage_length
+        return 0.9 * self.fuselage.length
 
     # @Attribute
     # def X_CG(self):
@@ -121,7 +121,7 @@ class Tail(GeomBase):
 
     @Attribute
     def X_v(self):
-        return 0.9 * self.Fuselage_length
+        return 0.9 * self.fuselage.length
     @Attribute
     def sweep_LE_v(self):
         return 25
@@ -182,6 +182,6 @@ class Tail(GeomBase):
             )
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = Tail(horizontal_airfoil='0018',vertical_airfoil='0018',X_CG=5,Fuselage_length=20,MAC=4,surface=200,span=20)
+    obj = Tail(horizontal_airfoil='0018',vertical_airfoil='0018',X_CG=5,length=20,MAC=4,surface=200,span=20)
 
     display(obj)
