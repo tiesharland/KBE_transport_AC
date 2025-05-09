@@ -1,2 +1,2 @@
-from .airfoil import Airfoil
-from .Sizing import calculate_optimal_point
+from .ClassI import ClassI
+from .ClassII import ClassII

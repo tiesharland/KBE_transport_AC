@@ -78,7 +78,6 @@ class Wing(GeomBase):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=self.tip_le_offset, y=self.span/2))
 
-
     @Part
     def tip_mirrored(self):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
@@ -86,12 +85,14 @@ class Wing(GeomBase):
 
     @Part
     def wing(self):
-        return LoftedSurface(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile])
+        return LoftedSurface(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
+                             position=self.position)
 
 
     @Part
     def fueltank(self):
-        return FuelTank(airfoil_name_root=self.airfoil_name_root,airfoil_name_tip=self.airfoil_name_tip,root_chord=self.root_chord,tip_chord=self.tip_chord,span=self.span)
+        return FuelTank(airfoil_name_root=self.airfoil_name_root, airfoil_name_tip=self.airfoil_name_tip,
+                        root_chord=self.root_chord, tip_chord=self.tip_chord,span=self.span, position=self.wing.position)
 
 
 if __name__ == '__main__':
