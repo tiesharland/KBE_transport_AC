@@ -27,14 +27,6 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
     e = 0.9 #ADSEE I lec 2
     eta_p = 0.82 #ADSEE I lec 2
 
-    # #Inputs
-    # # Cruise conditions
-    # h_cr = 8535  # [m]
-    # V_cr = 150
-    # #Take-off distance
-    # s_TO = 914  # m
-    # #Landing distance
-    # s_landing = 762  # m
 
     # Stall speed W/S computation
     def stall_speed(CL_max):
