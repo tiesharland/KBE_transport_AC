@@ -85,7 +85,7 @@ class Wing(GeomBase):
 
     @Part
     def wing(self):
-        return LoftedSurface(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
+        return RuledShell(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
                              position=self.position)
 
 
