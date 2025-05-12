@@ -1,2 +1,3 @@
-from .ClassI import ClassI
-from .ClassII import ClassII
+from .classI import ClassI
+from .classII import ClassII
+from .estimate import Estimation
