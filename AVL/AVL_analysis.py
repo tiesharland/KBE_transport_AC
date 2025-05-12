@@ -7,16 +7,18 @@ from Wing.airfoil import Airfoil
 
 
 class AVL(GeomBase):
+    name = Input("wing")
     airfoil_name_root = Input()
     root_chord = Input()
     airfoil_name_tip = Input()
     tip_chord = Input()
     tip_le_offset = Input()
-    surface = Input()
+    surface_area = Input()
     span = Input()
     MAC = Input()
     mach = Input()
     cl_cr = Input()
+    AoA = Input ()
 
     @Part
     def root_airfoil(self):
@@ -26,6 +28,8 @@ class AVL(GeomBase):
     def tip_airfoil(self):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=self.tip_le_offset, y=self.span / 2))
+
+
 
 
     @Part
@@ -58,27 +62,31 @@ class AVL(GeomBase):
     @Part
     def avl_configuration(self):
         return avl.Configuration(name='cruise',
-                                 reference_area=self.surface,
+                                 reference_area=self.surface_area,
                                  reference_span=self.span,
                                  reference_chord=self.MAC,
                                  reference_point=self.position.point,
                                  surfaces=self.avl_surfaces,
                                  mach=self.mach)
-
-
+    #Fixed CL
+    # @Attribute
+    # def avl_settings(self):
+    #     return {'alpha': avl.Parameter(name='alpha',
+    #                                    setting='CL',
+    #                                    value=self.cl_cr)}
+    # @Part
+    # def avl_case(self):
+    #     return avl.Case(name='fixed_cl',
+    #                     settings=self.avl_settings)
+    #Fixed AoA
     @Attribute
     def avl_settings(self):
         return {'alpha': avl.Parameter(name='alpha',
-                                       setting='CL',
-                                       value=self.cl_cr)}
-
+                                       value=self.AoA)}
     @Part
     def avl_case(self):
-        return avl.Case(name='fixed_cl',
-                        # name _must_ correspond to type of case
+        return avl.Case(name='fixed_aoa',
                         settings=self.avl_settings)
-
-
 
     @Part
     def avl_analysis(self):
@@ -97,7 +105,18 @@ class AVL(GeomBase):
 if __name__ == '__main__':
     from parapy.gui import display
 
-
-    obj = AVL(airfoil_name_root='64318',root_chord=5, airfoil_name_tip = '64412',tip_chord=2,tip_le_offset=3,surface=20,span=5,MAC=1.5,mach=0.491,cl_cr=0.4)
-
+    obj=AVL(
+        airfoil_name_root='23008',
+        root_chord=7.48984862840731,
+        airfoil_name_tip='23008',
+        tip_chord=2.995939451362924,
+        tip_le_offset=1.1234772942610964,
+        surface_area=277.63,
+        span=52.9,
+        MAC=5.56,
+        mach=0.49,
+        cl_cr=0.5,
+        AoA = 2.0
+    )
     display(obj)
+
