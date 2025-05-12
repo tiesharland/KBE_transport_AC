@@ -1,8 +1,8 @@
 from parapy.core import *
 from parapy.geom import *
-from Fuselage import Crates
-from Fuselage import Vehicles
-from Fuselage import Personnel
+from Fuselage.crates import Crates
+from Fuselage.vehicle import Vehicles
+from Fuselage.personnel import Personnel
 import numpy as np
 from scipy.optimize import minimize_scalar
 

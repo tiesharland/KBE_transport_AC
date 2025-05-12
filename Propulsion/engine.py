@@ -2,7 +2,7 @@ from math import sqrt, radians, tan, pi
 import numpy as np
 from parapy.core import *
 from parapy.geom import *
-from Wing import calculate_optimal_point
+from Wing.Sizing import calculate_optimal_point
 
 
 class Engines(GeomBase):

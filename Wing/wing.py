@@ -1,9 +1,9 @@
 from math import sqrt, radians, tan, pi
 from parapy.core import *
 from parapy.geom import *
-from Wing import Airfoil
-from Wing import calculate_optimal_point
-from Wing import FuelTank
+from Wing.airfoil import Airfoil
+from Wing.Sizing import calculate_optimal_point
+from Wing.fueltank import FuelTank
 
 class Wing(GeomBase):
     mtow = Input()

@@ -1,10 +1,10 @@
 from parapy.core import *
 from parapy.geom import *
-from Fuselage import Fuselage
-from Propulsion import Engines
-from Wing import Wing
-from Tail import Tail
-from Weight_estimation import Estimation
+from Fuselage.fuselage import Fuselage
+from Propulsion.engine import Engines
+from Wing.wing import Wing
+from Tail.tail import Tail
+from Weight_estimation.estimate import Estimation
 
 class Aircraft(GeomBase):
     num_crates = Input()

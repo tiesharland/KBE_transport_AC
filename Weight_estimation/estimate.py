@@ -1,8 +1,8 @@
 from parapy.core import *
 from parapy.geom import *
 import numpy as np
-from Weight_estimation import ClassI
-from Weight_estimation import ClassII
+from Weight_estimation.classI import ClassI
+from Weight_estimation.classII import ClassII
 
 
 class Estimation(Base):
