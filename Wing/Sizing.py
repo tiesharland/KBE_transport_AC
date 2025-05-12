@@ -67,12 +67,13 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
 
         if h_cr < 0 or h_cr > 11000:
             raise ValueError("Altitude must be within 0–11000 meters.")
-
+        T = T0 - L * h_cr
         rho = ((1 + (L * h_cr / T0)) ** - (g0 / (R * L) + 1) ) * rho_SL
 
-        return rho
+        return rho,T
 
-    rho = isa_density(h_cr)
+    rho = isa_density(h_cr)[0]
+    T = isa_density(h_cr)[1]
     def cruise(CD0, A, e, eta_p, rho, V_cr, rho_SL):
         x = np.arange(1, 7000, 10)
 
@@ -83,6 +84,12 @@ def calculate_optimal_point(s_TO: int, s_landing: int, h_cr: int, V_cr: int,
         y = eta_p * (rho / rho_SL) ** (3 / 4) * (term1 + term2) ** (-1)
         return x, y
 
+    def Mach(rho,V_cr,T):
+        gamma = 1.4
+        R = 287
+        a = np.sqrt(gamma * R * T)
+        M = V_cr/a
+        return M
 
     #Take off requirement
     x_to, y_to = take_off((CL_max[1]/(1.1**2)), TOP, sigma)

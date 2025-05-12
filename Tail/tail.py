@@ -58,6 +58,7 @@ class Tail(GeomBase):
     @Attribute
     def S_wing(self):
         return self.surface
+
     @Attribute
     def surface_h(self):
         return (self.S_wing * self.MAC * self.volume_coefficient_h)/ (self.X_h - self.X_CG)
@@ -122,6 +123,7 @@ class Tail(GeomBase):
     @Attribute
     def X_v(self):
         return 0.9 * self.fuselage.length
+
     @Attribute
     def sweep_LE_v(self):
         return 25
