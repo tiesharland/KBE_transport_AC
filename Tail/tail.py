@@ -1,8 +1,6 @@
 from parapy.core import *
 from parapy.geom import *
-from Wing.wing import Wing
-from Fuselage.fuselage import Fuselage
-from math import sqrt, radians, tan, pi
+from math import sqrt, radians, tan
 from kbeutils.geom import Naca4AirfoilCurve
 
 class Tail(GeomBase):
@@ -13,7 +11,7 @@ class Tail(GeomBase):
     MAC = Input()
     surface = Input()
     span = Input()
-
+    x_root_t = Input()
 
     @Part
     def horizontal_tail_airfoil(self):
@@ -22,7 +20,6 @@ class Tail(GeomBase):
             designation=self.horizontal_airfoil,
             hidden=True
         )
-
 
     @Part
     def vertical_tail_airfoil(self):
@@ -43,17 +40,10 @@ class Tail(GeomBase):
     @Attribute
     def volume_coefficient_h(self):
         return 1
+
     @Attribute
     def X_h(self):
-        return 0.9 * self.fuselage.length
-
-    # @Attribute
-    # def X_CG(self):
-    #     return self.X_CG
-    #
-    # @Attribute
-    # def MAC(self):
-    #     return self.MAC
+        return self.x_root_t
 
     @Attribute
     def S_wing(self):
@@ -61,7 +51,7 @@ class Tail(GeomBase):
 
     @Attribute
     def surface_h(self):
-        return (self.S_wing * self.MAC * self.volume_coefficient_h)/ (self.X_h - self.X_CG)
+        return (self.S_wing * self.MAC * self.volume_coefficient_h) / (self.X_h - self.X_CG)
 
     @Attribute
     def span_h(self):
@@ -70,6 +60,14 @@ class Tail(GeomBase):
     @Attribute
     def root_chord_h(self):
         return (2 * self.surface_h) / (1 + self.taper_ratio_h) / self.span_h
+
+    @Attribute
+    def MAC_h(self):
+        return 2/3 * self.root_chord_h * (1 + self.taper_ratio_h + self.taper_ratio_h**2) / (1 + self.taper_ratio_h)
+
+    @Attribute
+    def x_LEMAC_h_offset(self):
+        return (self.root_chord_h - self.MAC_h) / 2
 
     @Attribute
     def tip_chord_h(self):
@@ -122,7 +120,7 @@ class Tail(GeomBase):
 
     @Attribute
     def X_v(self):
-        return 0.9 * self.fuselage.length
+        return self.x_root_t
 
     @Attribute
     def sweep_LE_v(self):
@@ -143,6 +141,14 @@ class Tail(GeomBase):
     @Attribute
     def root_chord_v(self):
         return (2 * self.surface_v) / (1 + self.taper_ratio_v) / self.span_v
+
+    @Attribute
+    def MAC_v(self):
+        return 2/3 * self.root_chord_v * (1 + self.taper_ratio_v + self.taper_ratio_v**2) / (1 + self.taper_ratio_v)
+
+    @Attribute
+    def x_LEMAC_v_offset(self):
+        return (self.root_chord_v - self.MAC_v) / 2
 
     @Attribute
     def tip_chord_v(self):
@@ -181,7 +187,9 @@ class Tail(GeomBase):
     def vertical_tail(self):
         return LoftedSurface(
             profiles=[self.root_airfoil_v_translated,self.tip_airfoil_v_translated],
-            )
+        )
+
+
 if __name__ == '__main__':
     from parapy.gui import display
     obj = Tail(horizontal_airfoil='0018',vertical_airfoil='0018',X_CG=5,length=20,MAC=4,surface=200,span=20)

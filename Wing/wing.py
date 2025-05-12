@@ -1,9 +1,9 @@
 from math import sqrt, radians, tan, pi
 from parapy.core import *
 from parapy.geom import *
-from Wing.airfoil import Airfoil
-from Wing.Sizing import calculate_optimal_point
-from Wing.fueltank import FuelTank
+from Wing import Airfoil
+from Wing import calculate_optimal_point
+from Wing import FuelTank
 
 class Wing(GeomBase):
     mtow = Input()
@@ -68,6 +68,10 @@ class Wing(GeomBase):
     @Attribute
     def MAC(self):
         return 2/3 * self.root_chord * (1 + self.taper_ratio + self.taper_ratio**2) / (1 + self.taper_ratio)
+
+    @Attribute
+    def x_LEMAC_offset(self):
+        return (self.root_chord - self.MAC) / 2
 
     @Part
     def root_airfoil(self):
