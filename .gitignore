@@ -4,3 +4,4 @@
 Wing/__pycache__/airfoil.cpython-311.pyc
 *.pyc
 __pycache__/
+.idea/workspace.xml~

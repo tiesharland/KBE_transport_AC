@@ -146,7 +146,7 @@ class FuelTank(GeomBase):
 
     @Part
     def fueltank_shell(self):
-        return SewnShell(built_from=[self.fueltank_shell_inner,self.fueltank_shell_outer])
+        return SewnShell(built_from=[self.fueltank_shell_inner, self.fueltank_shell_outer])
 
     @Part
     def fuel_tank(self):
