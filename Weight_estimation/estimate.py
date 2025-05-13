@@ -36,7 +36,6 @@ class Estimation(Base):
     sweep_LE_v = Input()
     ttail = Input()
 
-
     @Attribute
     def Fw(self):
         return self.radius - 0.5 * self.tail_length * np.tan(np.deg2rad(self.divergence_angle))
@@ -49,6 +48,11 @@ class Estimation(Base):
                                        self.Fw, self.span_h, self.surface_h, self.A_h, self.taper_ratio_h, self.Se,
                                        self.A_v, self.surface_v, self.taper_ratio_v, self.sweep_LE_v, self.ttail)
         return W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt
+
+    @Attribute
+    def converge(self):
+        W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt = self.weight
+        return W_oe - (W_w + W_fus + W_ht + W_vt)
 
 
 

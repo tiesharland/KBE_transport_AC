@@ -6,6 +6,7 @@ from Wing.wing import Wing
 from Tail.tail import Tail
 from Weight_estimation.estimate import Estimation
 
+
 class Aircraft(GeomBase):
     num_crates = Input()
     num_vehicles = Input()
@@ -63,9 +64,10 @@ class Aircraft(GeomBase):
                            surface_h=self.empennage.surface_h, A_h=self.empennage.A_h,
                            taper_ratio_h=self.empennage.taper_ratio_h, Se=114.9,
                            surface_v=self.empennage.surface_v, A_v=self.empennage.A_v,
-                           taper_ratio_v=self.empennage.taper_ratio_v, sweep_LE_v=self.empennage.sweep_LE_v, ttail=0)
+                           taper_ratio_v=self.empennage.taper_ratio_v, sweep_LE_v=self.empennage.sweep_LE_v, ttail=0,
+                           Vi=0, Vp=0, Vt=0, Nt=2)
         W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt = estim.weight
-        return W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt
+        return W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt, estim.converge
 
     @Part
     def fuselage(self):
