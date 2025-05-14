@@ -1,7 +1,6 @@
 from parapy.core import *
 from parapy.geom import *
-import numpy as np
-from kbeutils.geom import Naca4AirfoilCurve, Naca5AirfoilCurve
+from Wing.tank_profile import TankProfile
 
 
 class FuelTank(GeomBase):
@@ -9,156 +8,93 @@ class FuelTank(GeomBase):
     airfoil_name_tip = Input()
     root_chord = Input()
     tip_chord = Input()
+    tip_le_offset = Input()
     span = Input()
-
-    @Part
-    def root_airfoil(self):
-        return DynamicType(
-            type=(Naca5AirfoilCurve if len(self.airfoil_name_root) == 5 else Naca4AirfoilCurve),
-            designation=self.airfoil_name_root,
-            hidden=True
-        )
+    wall_thickness = Input()
 
     @Attribute
-    def root_coords(self):
-        return np.array(self.root_airfoil.coordinates)
+    def scaled_factor_x(self):
+        return 1 - (2 * self.wall_thickness / (self.root_tank.bbox.bounds[3] - self.root_tank.bbox.bounds[0]))
 
     @Attribute
-    def trimmed_root_coords(self):
-        return self.root_coords[(self.root_coords[:, 0] > 0.2) & (self.root_coords[:, 0] < 0.75)]
+    def scaled_factor_y(self):
+        return 1 - (2 * self.wall_thickness / (self.root_tank.bbox.bounds[4] - self.root_tank.bbox.bounds[1]))
 
     @Attribute
-    def trimmed_upper_coords(self):
-        return self.trimmed_root_coords[self.trimmed_root_coords[:, 2] >= 0]
-
-    @Attribute
-    def trimmed_lower_coords(self):
-        return self.trimmed_root_coords[self.trimmed_root_coords[:, 2] < 0]
-
-    @Attribute
-    def closed_trimmed_coords(self):
-        upper = self.trimmed_upper_coords
-        lower = self.trimmed_lower_coords
-        front_spar = np.array([lower[-1], upper[0]])
-        rear_spar = np.array([upper[-1], lower[0]])
-        return np.vstack([front_spar, upper, rear_spar, lower[:-1]])
-
-    @Attribute
-    def scaled_root_coords(self):
-        return np.array([
-            [x * self.root_chord, y * self.root_chord, z * self.root_chord]
-            for x, y, z in self.closed_trimmed_coords
-        ])
+    def scaled_factor_z(self):
+        return 1 - (2 * self.wall_thickness / (self.root_tank.bbox.bounds[5] - self.root_tank.bbox.bounds[2]))
 
     @Part
-    def trimmed_root(self):
-        return Polyline(points=[Point(x, y, z) for x, y, z in self.scaled_root_coords], close=True)
+    def root_profile(self):
+        return TankProfile(airfoil_name=self.airfoil_name_root, position=self.position)
 
     @Part
-    def tip_airfoil(self):
-        return DynamicType(
-            type=(Naca5AirfoilCurve if len(self.airfoil_name_tip) == 5 else Naca4AirfoilCurve),
-            designation=self.airfoil_name_tip,
-            hidden=True
-        )
-
-    @Attribute
-    def tip_coords(self):
-        return np.array(self.tip_airfoil.coordinates)
-
-    @Attribute
-    def trimmed_tip_coords(self):
-        return self.tip_coords[(self.tip_coords[:, 0] > 0.2) & (self.tip_coords[:, 0] < 0.75)]
-
-    @Attribute
-    def trimmed_upper_coords_tip(self):
-        return self.trimmed_tip_coords[self.trimmed_tip_coords[:, 2] >= 0]
-
-    @Attribute
-    def trimmed_lower_coords_tip(self):
-        return self.trimmed_tip_coords[self.trimmed_tip_coords[:, 2] < 0]
-
-    @Attribute
-    def closed_trimmed_coords_tip(self):
-        upper_tip = self.trimmed_upper_coords_tip
-        lower_tip = self.trimmed_lower_coords_tip
-        front_spar_tip = np.array([lower_tip[-1], upper_tip[0]])
-        rear_spar_tip = np.array([upper_tip[-1], lower_tip[0]])
-        return np.vstack([front_spar_tip, upper_tip, rear_spar_tip, lower_tip[:-1]])
-
-    @Attribute
-    def scaled_translated_tip_coords(self):
-        return np.array([
-            [x * self.tip_chord +(self.root_chord-self.tip_chord)/4, y * self.tip_chord + self.span / 2, z * self.tip_chord]
-            for x, y, z in self.closed_trimmed_coords_tip
-        ])
-
-    @Attribute
-    def scaled_translated_tip_coords_mirrored(self):
-        return np.array([
-            [x * self.tip_chord+(self.root_chord-self.tip_chord)/4, y * self.tip_chord - self.span / 2, z * self.tip_chord]
-            for x, y, z in self.closed_trimmed_coords_tip
-        ])
+    def root_tank(self):
+        return ScaledCurve(curve_in=self.root_profile.trim_curve.curve, reference_point=self.position.point,
+                           factor=self.root_chord)
 
     @Part
-    def trimmed_tip(self):
-        return Polyline(points=[Point(x, y, z) for x, y, z in self.scaled_translated_tip_coords], close=True)
+    def tip_profile_right(self):
+        return TankProfile(airfoil_name=self.airfoil_name_tip,
+                           position=self.position.translate(x=self.tip_le_offset/self.tip_chord,
+                                                            y=self.span/2/self.tip_chord))
 
     @Part
-    def trimmed_tip_mirrored(self):
-        return Polyline(points=[Point(x, y, z) for x, y, z in self.scaled_translated_tip_coords_mirrored], close=True)
+    def tip_profile_left(self):
+        return TankProfile(airfoil_name=self.airfoil_name_tip,
+                           position=self.position.translate(x=self.tip_le_offset/self.tip_chord,
+                                                            y=-self.span/2/self.tip_chord))
 
     @Part
-    def fuel_tank_surface_inner(self):
-        return LoftedShell(profiles=[self.trimmed_root, self.trimmed_tip])
+    def tip_tank_right(self):
+        return ScaledCurve(curve_in=self.tip_profile_right.trim_curve.curve, reference_point=self.position.point,
+                           factor=self.tip_chord)
 
     @Part
-    def fuel_tank_surface_outer(self):
-        return LoftedShell(profiles=[self.trimmed_tip_mirrored,self.trimmed_root])
+    def tip_tank_left(self):
+        return ScaledCurve(curve_in=self.tip_profile_left.trim_curve.curve, reference_point=self.position.point,
+                           factor=self.tip_chord)
+
+    # @Part
+    # def tip_tank_right_inner(self):
+    #     return ScaledCurve(curve_in=self.tip_tank_right, reference_point=self.position.point,
+    #                        factor=(self.scaled_factor_x, self.scaled_factor_y, self.scaled_factor_z))
+    #
+    # @Part
+    # def tip_tank_left_inner(self):
+    #     return ScaledCurve(curve_in=self.tip_tank_left, reference_point=self.position.point,
+    #                        factor=(self.scaled_factor_x, self.scaled_factor_y, self.scaled_factor_z))
+
+
+    #
+    # @Attribute
+    # def right_tip_offset(self):
+    #     v = self.trimmed_tip_right_inner_scale.cog.vector_to(Wire(curves_in=[self.trimmed_tip_right]).cog)
+    #     return Vector(v.x, v.y - self.wall_thickness, v.z)
+    #
+    # @Attribute
+    # def left_tip_offset(self):
+    #     v = self.trimmed_tip_left_inner_scale.cog.vector_to(Wire(curves_in=[self.trimmed_tip_left]).cog)
+    #     return Vector(v.x, v.y + self.wall_thickness, v.z)
 
     @Part
-    def root_face(self):
-        return Face(island=self.trimmed_root)
+    def outer_surf(self):
+        return RuledSolid(profiles=[self.tip_tank_left, self.root_tank, self.tip_tank_right],
+                          transparency=0.4, position=self.position)
 
-    @Part
-    def tip_face(self):
-        return Face(island=self.trimmed_tip)
-
-    @Part
-    def tip_face_mirrored(self):
-        return Face(island=self.trimmed_tip_mirrored)
-
-    @Part
-    def fueltank_shell_inner(self):
-        return SewnShell(built_from=[
-            self.root_face,
-            self.tip_face,
-            self.fuel_tank_surface_inner,
-        ])
-
-    @Part
-    def fueltank_shell_outer(self):
-        return SewnShell(built_from=[
-            self.root_face,
-            self.tip_face_mirrored,
-            self.fuel_tank_surface_outer,
-        ])
-
-    @Part
-    def fueltank_shell(self):
-        return SewnShell(built_from=[self.fueltank_shell_inner, self.fueltank_shell_outer])
-
-    @Part
-    def fuel_tank(self):
-        return Solid(built_from=self.fueltank_shell,
-                     color='steelblue',
-                     transparency=0.2
-                     )
+    # @Part
+    # def inner_surf(self):
+    #     return RuledSolid(profiles=[self.tip_tank_left_inner, self.root_tank_inner, self.tip_tank_right_inner],
+    #                       transparency=0.7, position=self.position)
+    #
+    # @Part
+    # def fuel_tank(self):
+    #     return SubtractedSolid(shape_in=self.outer_surf, tool=self.inner_surf, position=self.position)
 
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = FuelTank(airfoil_name_root='64318', airfoil_name_tip='62218', root_chord=9, tip_chord=2,span=20)
+    obj = FuelTank(airfoil_name_root='64318', airfoil_name_tip='62218', root_chord=9, tip_chord=2, span=20, wall_thickness=0.05)
     display(obj)
 
 

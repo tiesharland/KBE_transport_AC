@@ -3,7 +3,7 @@ from parapy.core import *
 from parapy.geom import *
 from Wing.airfoil import Airfoil
 from Wing.Sizing import calculate_optimal_point
-from Wing.fueltank_4 import FuelTank
+from Wing.fueltank import FuelTank
 
 class Wing(GeomBase):
     mtow = Input()
