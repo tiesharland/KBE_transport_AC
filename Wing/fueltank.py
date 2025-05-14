@@ -1,6 +1,6 @@
 from parapy.core import *
 from parapy.geom import *
-from Wing.tank_profile import TankProfile
+from Wing.tankprofile import TankProfile
 
 
 class FuelTank(GeomBase):

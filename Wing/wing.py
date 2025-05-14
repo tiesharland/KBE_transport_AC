@@ -6,7 +6,7 @@ from Wing.Sizing import calculate_optimal_point
 from Wing.fueltank import FuelTank
 
 class Wing(GeomBase):
-    mtow = Input()
+    tow = Input()
     s_to = Input()
     s_landing = Input()
     h_cr = Input()
@@ -19,7 +19,7 @@ class Wing(GeomBase):
     @Attribute
     def surface(self):
         ws, wp = calculate_optimal_point(self.s_to, self.s_landing, self.h_cr, self.V_cr, self.A, plotting=False)
-        return self.mtow / ws
+        return self.tow / ws
 
     @Attribute
     def taper_ratio(self):
@@ -101,5 +101,5 @@ class Wing(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    wing = Wing(mtow=70307*9.81, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip = '64412')
+    wing = Wing(tow=70307*9.81, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip = '64412')
     display(wing)
