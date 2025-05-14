@@ -10,7 +10,8 @@ class Airfoil(GeomBase):
     @Part
     def airfoil(self):
         return DynamicType(type=(Naca5AirfoilCurve if len(self.airfoil_name) == 5 else Naca4AirfoilCurve),
-                           designation=self.airfoil_name, hidden=True)
+                           designation=self.airfoil_name, hidden=False)
+
     @Part
     def profile(self):
         return ScaledCurve(curve_in=self.airfoil, reference_point=self.position.point, factor=self.chord)

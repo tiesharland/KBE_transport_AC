@@ -3,7 +3,7 @@ from parapy.core import *
 from parapy.geom import *
 from Wing.airfoil import Airfoil
 from Wing.Sizing import calculate_optimal_point
-from Wing.fueltank import FuelTank
+from Wing.fueltank_4 import FuelTank
 
 class Wing(GeomBase):
     mtow = Input()
@@ -95,7 +95,8 @@ class Wing(GeomBase):
     @Part
     def fueltank(self):
         return FuelTank(airfoil_name_root=self.airfoil_name_root, airfoil_name_tip=self.airfoil_name_tip, span=self.span,
-                        root_chord=self.root_chord, tip_chord=self.tip_chord, position=self.wing.position)
+                        root_chord=self.root_chord, tip_chord=self.tip_chord, tip_le_offset=self.tip_le_offset,
+                        wall_thickness=0.02, position=self.position)
 
 
 if __name__ == '__main__':
