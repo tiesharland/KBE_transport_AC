@@ -77,7 +77,7 @@ class Cargo(GeomBase):
     def mass(self):
         return self.personnel.mass + self.vehicles.mass + self.crates.mass
     @Attribute
-    def cg(self):
+    def cg_x(self):
         x_cg = ((self.crates.mass * self.crates.cg) + (self.vehicles.mass * self.vehicles.cg) +(self.personnel.mass * self.personnel.cg)) / self.mass
         return x_cg
 

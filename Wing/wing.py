@@ -20,7 +20,7 @@ class Wing(GeomBase):
     @Attribute
     def surface(self):
         ws, wp = calculate_optimal_point(self.s_to, self.s_landing, self.h_cr, self.V_cr, self.A, plotting=False)
-        return self.tow / ws
+        return self.tow * 9.81 / ws
 
     @Attribute
     def taper_ratio(self):

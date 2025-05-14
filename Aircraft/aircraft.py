@@ -26,7 +26,7 @@ class Aircraft(GeomBase):
     root_le = Input()
     horizontal_airfoil = Input()
     vertical_airfoil = Input()
-    X_CG = Input()
+    # X_CG = Input()
     cl_cr = Input()
     AoA = Input()
     mach = Input()
@@ -51,11 +51,11 @@ class Aircraft(GeomBase):
 
     @Attribute
     def Lt_h(self):
-        return self.x_root_t + self.empennage.x_LEMAC_h_offset - self.x_lemac
+        return self.x_root_t + self.horizontaltail.x_LEMAC_h_offset - self.x_lemac
 
     @Attribute
     def Lt_v(self):
-        return self.x_root_t + self.empennage.x_LEMAC_v_offset - self.x_lemac
+        return self.x_root_t + self.verticaltail.x_LEMAC_v_offset - self.x_lemac
 
     @Attribute
     def Fw(self):
@@ -67,13 +67,13 @@ class Aircraft(GeomBase):
 
     @Attribute
     def class2(self):
-        return ClassII(w_to=self.class1[1], Nz=3, Sw=self.wing.surface, L=self.fuselage.length, D=self.fuselage.thickness,
+        return ClassII(W_to=self.class1.wto, Nz=3, Sw=self.wing.surface, L=self.fuselage.length, D=self.fuselage.thickness,
                        Sf=self.fuselage.fuselage.area, span=self.wing.span, A=self.A, taper=self.wing.taper_ratio,
                        Scsw=2*55, Lt_h=self.Lt_h, Lt_v=self.Lt_v, tc_root=self.wing.thickness_ratio, Fw=self.Fw,
-                       span_h=self.empennage.span_h, S_ht=self.emepnnage.surface_h, Ah=self.empennage.A_h,
-                       taper_h=self.empennage.taper_ratio_h, Se=114.9, Av=self.empennage.A_v,
-                       S_vt=self.empennage.surface_v, taper_v=self.empennage.taper_ratio_v,
-                       sweep_le_v=self.empennage.sweep_LE_v, ttail=0, Vi=self.wing.fueltank.outer_surf.volume, Vp=0,
+                       span_h=self.horizontaltail.span_h, S_ht=self.horizontaltail.surface_h, Ah=self.horizontaltail.A_h,
+                       taper_h=self.horizontaltail.taper_ratio_h, Se=114.9, Av=self.verticaltail.A_v,
+                       S_vt=self.verticaltail.surface_v, taper_v=self.verticaltail.taper_ratio_v,
+                       sweep_le_v=self.verticaltail.sweep_LE_v, ttail=0, Vi=self.wing.fueltank.outer_surf.volume, Vp=0,
                        Vt=self.wing.fueltank.outer_surf.volume, Nt=self.N_engines)
 
     # @Attribute
@@ -97,28 +97,43 @@ class Aircraft(GeomBase):
 
     @Part
     def wing(self):
-        return Wing(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip',
+        return Wing(pass_down='s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip', tow=self.class1.wto,
                     position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
 
     @Part
     def propulsion(self):
-        return Engines(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span,
+        return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span, tow=self.class1.wto,
                        position=self.wing.position)
 
     @Part
-    def empennage(self):
-        return Tail(pass_down='horizontal_airfoil, vertical_airfoil, X_CG, x_root_t',
+    def horizontaltail(self):
+        return HorizontalTail(pass_down='horizontal_airfoil, X_CG, x_root_t',
                     length=self.fuselage.length, MAC=self.wing.MAC, surface=self.wing.surface, span=self.wing.span,
                     position=self.position.translate(x=self.x_root_t, z=self.fuselage.radius))
+
+    @Part
+    def verticaltail(self):
+        return VerticalTail(pass_down='vertical_airfoil, X_CG, x_root_t',
+                              length=self.fuselage.length, MAC=self.wing.MAC, surface=self.wing.surface,
+                              span=self.wing.span,
+                              position=self.position.translate(x=self.x_root_t, z=self.fuselage.radius))
     @Part
     def AVL(self):
         return AVL(pass_down='cl_cr,AoA,mach', airfoil_name_root =self.wing.airfoil_name_root,root_chord =self.wing.root_chord,airfoil_name_tip = self.wing.airfoil_name_tip,tip_chord = self.wing.tip_chord,tip_le_offset = self.wing.tip_le_offset,surface = self.wing.surface,span = self.wing.span,MAC = self.wing.MAC,
                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
 
+    @Attribute
+    def X_CG(self):
+        return ((self.fuselage.cargo.cg_x * self.fuselage.cargo.mass) + (self.fuselage.cg_x * self.class2[1]) + (
+                    self.wing.cg_x * self.class2[0]) + (self.horizontaltail.cg_x * self.class2[2]) + (
+                            self.verticaltail.cg_x * self.class2[3]) + (self.wing.fueltank.cg_x * self.class2[4])) / (
+                    self.fuselage.cargo.mass + self.class2[0] + self.class2[1] + self.class2[2] + self.class2[3] +
+                    self.class2[4])
+        # return ((self.fuselage.cargo.cg_x * self.fuselage.cargo.mass) + (self.fuselage.cg_x * self.class2[1]) + (self.wing.cg_x * self.class2[0]) + (self.horizontaltail.cg_x * self.class2[2]) + (self.verticaltail.cg_x * self.class2[3]) + (self.fueltank.cg_x * self.class2[4])) + (self.propulsion.cg_x * self.class2[5]) / (self.fuselage.cargo.mass + self.class2[0] + self.class2[1]+ self.class2[2]+ self.class2[3]+ self.class2[4] + self.class2[5])
 
 
 if __name__ == '__main__':
     from parapy.gui import display
     cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, s_to=1093, R=4000000, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412',
-                     N_engines=4, root_le=0.4, horizontal_airfoil='0018', vertical_airfoil='0018', X_CG=4)
+                     N_engines=4, root_le=0.4, horizontal_airfoil='0018', vertical_airfoil='0018', cl_cr=0.4,AoA=2,mach=0.49)
     display(cargo)

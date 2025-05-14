@@ -7,7 +7,7 @@ from Wing.Sizing import calculate_optimal_point
 
 class Engines(GeomBase):
     name = Input()
-    mtow = Input()
+    tow = Input()
     s_to = Input()
     s_landing = Input()
     h_cr = Input()
@@ -19,7 +19,7 @@ class Engines(GeomBase):
     @Attribute
     def power_to(self):
         ws, wp = calculate_optimal_point(self.s_to, self.s_landing, self.h_cr, self.V_cr, self.A, plotting=False)
-        return self.mtow / wp
+        return self.tow * 9.81 / wp
 
     @Attribute
     def diameter_eng(self):
