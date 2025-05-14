@@ -34,8 +34,8 @@ class Personnel(GeomBase):
     @Attribute
     def cg(self):
         personnel_parts = self.seats
-        x_cg = sum(seat.cog[0] * self.single_mass for seat in personnel_parts) / self.mass
-        return x_cg
+        cg_x = sum(seat.cog[0] * self.single_mass for seat in personnel_parts) / self.mass
+        return cg_x
 
     @Part
     def seats(self):

@@ -1,1 +1,1 @@
-from .tail import Tail
+from .horizontal_tail import Tail

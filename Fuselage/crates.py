@@ -45,5 +45,5 @@ class Crates(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = Crates(num_crates=3)
+    obj = Crates(num_crates=2)
     display(obj)

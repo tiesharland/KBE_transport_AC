@@ -14,6 +14,7 @@ class Wing(GeomBase):
     A = Input()
     airfoil_name_root = Input()
     airfoil_name_tip = Input()
+    wing_mass = Input()
 
 
     @Attribute
@@ -73,6 +74,9 @@ class Wing(GeomBase):
     def x_LEMAC_offset(self):
         return (self.root_chord - self.MAC) / 2
 
+    @Attribute
+    def cg_x(self):
+        return self.wing.cog[0]
     @Part
     def root_airfoil(self):
         return Airfoil(airfoil_name=self.airfoil_name_root, chord=self.root_chord, position=self.position)

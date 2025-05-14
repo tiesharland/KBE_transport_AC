@@ -12,6 +12,7 @@ class Fuselage(GeomBase):
     nose_fineness = Input(1.2)
     tail_fineness = Input(3)
     divergence_angle = Input(18)
+    fuselage_mass = Input()
 
     @Attribute
     def nose_length(self):
@@ -41,10 +42,14 @@ class Fuselage(GeomBase):
     def fineness(self):
         return self.length / self.radius / 2
 
+
     # @fineness.validator
     # def fineness_validator(self, value):
     #     if value >
 
+    @Attribute
+    def cg_x(self):
+        return self.fuselage.cog[0]
     @Part
     def cargo(self):
         return Cargo(pass_down='num_crates, num_vehicles, num_persons',

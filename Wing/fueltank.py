@@ -11,6 +11,7 @@ class FuelTank(GeomBase):
     tip_le_offset = Input()
     span = Input()
     wall_thickness = Input()
+    fueltank_mass = Input()
 
     @Attribute
     def scaled_factor_x(self):
@@ -90,7 +91,9 @@ class FuelTank(GeomBase):
     # @Part
     # def fuel_tank(self):
     #     return SubtractedSolid(shape_in=self.outer_surf, tool=self.inner_surf, position=self.position)
-
+    @Attribute
+    def cg_x(self):
+        return self.outer_surf.cog[0]
 
 if __name__ == '__main__':
     from parapy.gui import display
