@@ -96,12 +96,12 @@ class Aircraft(GeomBase):
 
     @Part
     def wing(self):
-        return Wing(pass_down='s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip', tow=self.class1.wto,
+        return Wing(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip',
                     position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
 
     @Part
     def propulsion(self):
-        return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span, tow=self.class1.wto,
+        return Engines(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span,
                        position=self.wing.position)
 
     @Part
@@ -113,6 +113,7 @@ class Aircraft(GeomBase):
     def AVL(self):
         return AVL(pass_down='cl_cr,AoA,mach', airfoil_name_root =self.wing.airfoil_name_root,root_chord =self.wing.root_chord,airfoil_name_tip = self.wing.airfoil_name_tip,tip_chord = self.wing.tip_chord,tip_le_offset = self.wing.tip_le_offset,surface = self.wing.surface,span = self.wing.span,MAC = self.wing.MAC,
                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
+
 
 
 if __name__ == '__main__':

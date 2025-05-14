@@ -42,8 +42,18 @@ class Engines(GeomBase):
         return 1.1 * self.diameter_eng
 
     @Attribute
-    def mass(self):
+    def single_mass(self):
         return 1000
+
+    @Attribute
+    def engines_mass(self):
+        return self.N_engines * self.single_mass
+
+    @Attribute
+    def cg(self):
+        engine_parts = self.engines
+        cg_x = sum(engine.cog[0] * self.single_mass for engine in engine_parts) / self.engines_mass
+        return cg_x
 
     @Attribute
     def pos_engine(self):
@@ -64,7 +74,7 @@ class Engines(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    engines = Engines(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, N_engines=4)
+    engines = Engines(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, N_engines=4,span=20)
     display(engines)
 
 
