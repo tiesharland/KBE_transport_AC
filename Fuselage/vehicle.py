@@ -25,6 +25,11 @@ class Vehicles(GeomBase):
         def mass(self):
             return self.single_mass * self.num_vehicles
 
+        @Attribute
+        def cg(self):
+            vehicle_parts = self.vehicles
+            x_cg = sum(vehicle.cog[0] * self.single_mass for vehicle in vehicle_parts) / self.mass
+            return x_cg
         @Part
         def vehicles(self):
             return Box(

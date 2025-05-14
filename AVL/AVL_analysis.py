@@ -7,18 +7,18 @@ from Wing.airfoil import Airfoil
 
 
 class AVL(GeomBase):
-    name = Input("wing")
     airfoil_name_root = Input()
     root_chord = Input()
     airfoil_name_tip = Input()
     tip_chord = Input()
     tip_le_offset = Input()
-    surface_area = Input()
+    surface = Input()
     span = Input()
     MAC = Input()
     mach = Input()
     cl_cr = Input()
     AoA = Input ()
+
 
     @Part
     def root_airfoil(self):
@@ -62,7 +62,7 @@ class AVL(GeomBase):
     @Part
     def avl_configuration(self):
         return avl.Configuration(name='cruise',
-                                 reference_area=self.surface_area,
+                                 reference_area=self.surface,
                                  reference_span=self.span,
                                  reference_chord=self.MAC,
                                  reference_point=self.position.point,

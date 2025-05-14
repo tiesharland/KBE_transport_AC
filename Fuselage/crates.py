@@ -26,7 +26,11 @@ class Crates(GeomBase):
     def mass(self):
         return self.single_mass * self.num_crates
 
-
+    @Attribute
+    def cg(self):
+        crate_parts = self.crates
+        x_cg = sum(crate.cog[0] * self.single_mass for crate in crate_parts) / self.mass
+        return x_cg
 
     @Part
     def crates(self):
@@ -41,5 +45,5 @@ class Crates(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = Crates()
+    obj = Crates(num_crates=3)
     display(obj)

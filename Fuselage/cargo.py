@@ -73,6 +73,13 @@ class Cargo(GeomBase):
         return Circle(position=self.position.translate(x=(self.length*child.index)).rotate90('y'),
                       radius=self.outer_radius, quantify=2)
 
+    @Attribute
+    def mass(self):
+        return self.personnel.mass + self.vehicles.mass + self.crates.mass
+    @Attribute
+    def cg(self):
+        x_cg = ((self.crates.mass * self.crates.cg) + (self.vehicles.mass * self.vehicles.cg) +(self.personnel.mass * self.personnel.cg)) / self.mass
+        return x_cg
 
 if __name__ == "__main__":
     from parapy.gui import display

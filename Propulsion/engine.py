@@ -41,7 +41,10 @@ class Engines(GeomBase):
     def w_ee(self):
         return 1.1 * self.diameter_eng
 
-    #This still needs the class Wing to be instantiated, otherwise span is undefined
+    @Attribute
+    def mass(self):
+        return 1000
+
     @Attribute
     def pos_engine(self):
         if self.N_engines == 2:

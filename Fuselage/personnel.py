@@ -31,6 +31,12 @@ class Personnel(GeomBase):
     def mass(self):
         return self.single_mass * self.num_rows * self.num_columns
 
+    @Attribute
+    def cg(self):
+        personnel_parts = self.seats
+        x_cg = sum(seat.cog[0] * self.single_mass for seat in personnel_parts) / self.mass
+        return x_cg
+
     @Part
     def seats(self):
         return Box(length=self.single_width, width=self.single_length, height=self.single_height,
