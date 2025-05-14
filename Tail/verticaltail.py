@@ -4,7 +4,7 @@ from math import sqrt, radians, tan
 from kbeutils.geom import Naca4AirfoilCurve
 
 
-class Vertical_tail(GeomBase):
+class VerticalTail(GeomBase):
     vertical_airfoil = Input()
     X_CG = Input()
     length = Input()

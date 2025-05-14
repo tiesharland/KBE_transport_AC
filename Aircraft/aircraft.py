@@ -3,7 +3,8 @@ from parapy.geom import *
 from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
-from Tail.tail import Tail
+from Tail.horizontaltail import HorizontalTail
+from Tail.verticaltail import VerticalTail
 from Weight_estimation.classI import ClassI
 from Weight_estimation.classII import ClassII
 from AVL.AVL_analysis import AVL

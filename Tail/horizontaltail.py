@@ -3,7 +3,7 @@ from parapy.geom import *
 from math import sqrt, radians, tan
 from kbeutils.geom import Naca4AirfoilCurve
 
-class Horizontal_tail(GeomBase):
+class HorizontalTail(GeomBase):
     horizontal_airfoil = Input()
     X_CG = Input()
     length = Input()
