@@ -4,9 +4,9 @@ from parapy.geom import *
 
 
 class ClassI(Base):
-    crates = Input()
-    vehicles = Input()
-    persons = Input()
+    num_crates = Input()
+    num_vehicles = Input()
+    num_persons = Input()
     R = Input()
     ld_cr = Input(14)
     eff_p = Input(0.82)
@@ -15,15 +15,15 @@ class ClassI(Base):
 
     @Attribute
     def w_crates(self):
-        return self.crates * 4500 * 9.80655
+        return self.num_crates * 4500 * 9.80655
 
     @Attribute
     def w_vehicles(self):
-        return self.vehicles * 2962 * 9.80655
+        return self.num_vehicles * 2962 * 9.80655
 
     @Attribute
     def w_persons(self):
-        return self.persons * 100 * 9.80655
+        return self.num_persons * 100 * 9.80655
 
     @Attribute
     def w_payload(self):

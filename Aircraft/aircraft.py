@@ -4,8 +4,10 @@ from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
 from Tail.tail import Tail
-from Weight_estimation.estimate import Estimation
+from Weight_estimation.classI import ClassI
+from Weight_estimation.classII import ClassII
 from AVL.AVL_analysis import AVL
+import numpy as np
 
 class Aircraft(GeomBase):
     num_crates = Input()
@@ -26,7 +28,7 @@ class Aircraft(GeomBase):
     X_CG = Input()
     cl_cr = Input()
     AoA = Input()
-    mach =Input()
+    mach = Input()
 
     @Attribute
     def engine_attachment(self):
@@ -55,21 +57,38 @@ class Aircraft(GeomBase):
         return self.x_root_t + self.empennage.x_LEMAC_v_offset - self.x_lemac
 
     @Attribute
-    def weight(self):
-        estim = Estimation(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons,
-                           R=self.R, A=self.A, Lt_v=self.Lt_v, Lt_h=self.Lt_h, Nz=3, surface=self.wing.surface,
-                           length=self.fuselage.length, thickness=self.fuselage.thickness,
-                           radius=self.fuselage.radius, Sf=self.fuselage.fuselage.area, span=self.wing.span,
-                           taper_ratio=self.wing.taper_ratio, Scsw=2*55,
-                           thickness_ratio=self.wing.thickness_ratio, tail_length=self.fuselage.tail_length,
-                           divergence_angle=self.fuselage.divergence_angle, span_h=self.empennage.span_h,
-                           surface_h=self.empennage.surface_h, A_h=self.empennage.A_h,
-                           taper_ratio_h=self.empennage.taper_ratio_h, Se=114.9,
-                           surface_v=self.empennage.surface_v, A_v=self.empennage.A_v,
-                           taper_ratio_v=self.empennage.taper_ratio_v, sweep_LE_v=self.empennage.sweep_LE_v, ttail=0,
-                           Vi=self.wing.fueltank.outer_surf.volume, Vp=0, Vt=self.wing.fueltank.outer_surf.volume, Nt=2)
-        W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt, W_ft = estim.weight
-        return W_oe, W_to, W_f, W_w, W_fus, W_ht, W_vt, W_ft, estim.converge
+    def Fw(self):
+        return self.fuselage.radius - 0.5 * self.fuselage.tail_length * np.tan(np.deg2rad(self.fuselage.divergence_angle))
+
+    @Attribute
+    def class1(self):
+        return ClassI(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons, R=self.R)
+
+    @Attribute
+    def class2(self):
+        return ClassII(w_to=self.class1[1], Nz=3, Sw=self.wing.surface, L=self.fuselage.length, D=self.fuselage.thickness,
+                       Sf=self.fuselage.fuselage.area, span=self.wing.span, A=self.A, taper=self.wing.taper_ratio,
+                       Scsw=2*55, Lt_h=self.Lt_h, Lt_v=self.Lt_v, tc_root=self.wing.thickness_ratio, Fw=self.Fw,
+                       span_h=self.empennage.span_h, S_ht=self.emepnnage.surface_h, Ah=self.empennage.A_h,
+                       taper_h=self.empennage.taper_ratio_h, Se=114.9, Av=self.empennage.A_v,
+                       S_vt=self.empennage.surface_v, taper_v=self.empennage.taper_ratio_v,
+                       sweep_le_v=self.empennage.sweep_LE_v, ttail=0, Vi=self.wing.fueltank.outer_surf.volume, Vp=0,
+                       Vt=self.wing.fueltank.outer_surf.volume, Nt=self.N_engines)
+
+    # @Attribute
+    # def weight(self):
+    #     return Estimation(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons,
+    #                        R=self.R, A=self.A, Lt_v=self.Lt_v, Lt_h=self.Lt_h, Nz=3, surface=self.wing.surface,
+    #                        length=self.fuselage.length, thickness=self.fuselage.thickness,
+    #                        radius=self.fuselage.radius, Sf=self.fuselage.fuselage.area, span=self.wing.span,
+    #                        taper_ratio=self.wing.taper_ratio, Scsw=2*55,
+    #                        thickness_ratio=self.wing.thickness_ratio, tail_length=self.fuselage.tail_length,
+    #                        divergence_angle=self.fuselage.divergence_angle, span_h=self.empennage.span_h,
+    #                        surface_h=self.empennage.surface_h, A_h=self.empennage.A_h,
+    #                        taper_ratio_h=self.empennage.taper_ratio_h, Se=114.9,
+    #                        surface_v=self.empennage.surface_v, A_v=self.empennage.A_v,
+    #                        taper_ratio_v=self.empennage.taper_ratio_v, sweep_LE_v=self.empennage.sweep_LE_v, ttail=0,
+    #                        Vi=self.wing.fueltank.outer_surf.volume, Vp=0, Vt=self.wing.fueltank.outer_surf.volume, Nt=2)
 
     @Part
     def fuselage(self):
@@ -77,12 +96,12 @@ class Aircraft(GeomBase):
 
     @Part
     def wing(self):
-        return Wing(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip',
+        return Wing(pass_down='s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip', tow=self.class1.wto,
                     position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
 
     @Part
     def propulsion(self):
-        return Engines(pass_down='mtow, s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span,
+        return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span, tow=self.class1.wto,
                        position=self.wing.position)
 
     @Part
@@ -94,7 +113,6 @@ class Aircraft(GeomBase):
     def AVL(self):
         return AVL(pass_down='cl_cr,AoA,mach', airfoil_name_root =self.wing.airfoil_name_root,root_chord =self.wing.root_chord,airfoil_name_tip = self.wing.airfoil_name_tip,tip_chord = self.wing.tip_chord,tip_le_offset = self.wing.tip_le_offset,surface = self.wing.surface,span = self.wing.span,MAC = self.wing.MAC,
                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
-
 
 
 if __name__ == '__main__':
