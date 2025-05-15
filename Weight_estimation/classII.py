@@ -29,6 +29,7 @@ class ClassII(Base):
     Av = Input()
     S_vt = Input()
     taper_v = Input()
+    tc_vt = Input()
     sweep_le_v = Input()
     ttail = Input()
     Vi = Input()
@@ -129,7 +130,7 @@ class ClassII(Base):
         sweep_vt = np.arctan((self.taper_v - 1) / (self.taper_v + 1) / 2 / self.Av + np.tan(np.deg2rad(self.sweep_le_v)))
         return 0.45359 * (0.0026 * (1 + (1 if self.ttail else 0)) ** 0.225 * self.W_to ** 0.556 * self.Nz ** 0.536
                           / self.Lt_v ** 0.5 * self.S_vt ** 0.5 * Kz ** 0.875 / np.cos(sweep_vt) * self.Av ** 0.35
-                          / self.tc_root ** 0.5)
+                          / self.tc_vt ** 0.5)
 
     @Attribute
     def W_f(self):

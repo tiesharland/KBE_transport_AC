@@ -2,6 +2,7 @@ from parapy.core import *
 from parapy.geom import *
 from math import sqrt, radians, tan
 from kbeutils.geom import Naca4AirfoilCurve
+import numpy as np
 
 
 class VerticalTail(GeomBase):
@@ -12,8 +13,10 @@ class VerticalTail(GeomBase):
     span = Input()
     vertical_tail_mass = Input()
     length_fuselage = Input()
-
-
+    tow = Input()
+    Lt_v = Input()
+    Nz = Input()
+    ttail = Input(0)
 
     @Part
     def vertical_tail_airfoil(self):
@@ -38,6 +41,10 @@ class VerticalTail(GeomBase):
     @Attribute
     def X_v(self):
         return 0.9 * self.length_fuselage
+
+    @Attribute
+    def thickness_ratio_v(self):
+        return int(self.vertical_airfoil[-2:])
 
     @Attribute
     def sweep_LE_v(self):
@@ -83,6 +90,15 @@ class VerticalTail(GeomBase):
     @Attribute
     def cg_x(self):
         return self.vertical_tail.cog[0]
+
+    @Attribute
+    def class2_weight(self):
+        Kz = self.Lt_v / 0.3048 # AC radius of gyration ~lt
+        sweep_vt = np.arctan((self.taper_ratio_v - 1) / (self.taper_ratio_v + 1) / 2 / self.A_v + np.tan(np.deg2rad(self.sweep_LE_v)))
+        return 0.45359 * (0.0026 * (1 + (1 if self.ttail else 0)) ** 0.225 * (self.tow/ 0.45359) ** 0.556 * self.Nz ** 0.536
+                          / (self.Lt_v/0.3048) ** 0.5 * (self.surface_v/.3048**2) ** 0.5 * Kz ** 0.875 / np.cos(sweep_vt) * self.A_v ** 0.35
+                          / self.thickness_ratio_v ** 0.5)
+
     @Part
     def root_airfoil_v_translated(self):
         return TransformedCurve(

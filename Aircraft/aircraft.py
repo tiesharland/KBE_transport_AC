@@ -77,8 +77,9 @@ class Aircraft(GeomBase):
                        span_h=self.horizontaltail.span_h, S_ht=self.horizontaltail.surface_h, Ah=self.horizontaltail.A_h,
                        taper_h=self.horizontaltail.taper_ratio_h, Se=114.9*.3048 ** 2, Av=self.verticaltail.A_v,
                        S_vt=self.verticaltail.surface_v, taper_v=self.verticaltail.taper_ratio_v,
-                       sweep_le_v=self.verticaltail.sweep_LE_v, ttail=0, Vi=self.wing.fueltank.outer_surf.volume, Vp=0,
-                       Vt=self.wing.fueltank.outer_surf.volume, Nt=self.N_engines)
+                       tc_vt=self.verticaltail.thickness_ratio_v, sweep_le_v=self.verticaltail.sweep_LE_v,
+                       ttail=0, Vi=self.wing.fueltank.outer_surf.volume, Vp=0, Vt=self.wing.fueltank.outer_surf.volume,
+                       Nt=self.N_engines)
 
     # @Attribute
     # def weight(self):
@@ -107,20 +108,22 @@ class Aircraft(GeomBase):
 
     @Part
     def propulsion(self):
-        return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines', span=self.wing.span, tow=self.class1.wto,
+        return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines, Nz', span=self.wing.span, tow=self.class1.wto,
                        position=self.wing.position)
 
     @Part
     def horizontaltail(self):
         return HorizontalTail(pass_down='horizontal_airfoil', length_fuselage=self.fuselage.length, MAC=self.wing.MAC,
-                              surface=self.wing.surface, span=self.wing.span, X_CG = self.cg_tail_off,
-                              position=self.position.translate(x=self.horizontaltail.X_h, z=self.fuselage.radius))
+                              surface=self.wing.surface, span=self.wing.span, X_CG=self.cg_tail_off,
+                              position=self.position.translate(x=self.horizontaltail.X_h, z=self.fuselage.radius),
+                              tow=self.class1.wto, Nz=self.Nz, Fw=self.Fw, Lt_h=self.Lt_h)
 
     @Part
     def verticaltail(self):
         return VerticalTail(pass_down='vertical_airfoil', length_fuselage=self.fuselage.length, MAC=self.wing.MAC,
                             surface=self.wing.surface, span=self.wing.span, X_CG=self.cg_tail_off,
-                            position=self.position.translate(x=self.verticaltail.X_v, z=self.fuselage.radius))
+                            position=self.position.translate(x=self.verticaltail.X_v, z=self.fuselage.radius),
+                            tow=self.class1.wto, Nz=self.Nz, Lt_v=self.Lt_v)
     @Part
     def AVL(self):
         return AVL(pass_down='cl_cr,AoA,mach', airfoil_name_root=self.wing.airfoil_name_root,

@@ -2,6 +2,8 @@ from parapy.core import *
 from parapy.geom import *
 from math import sqrt, radians, tan
 from kbeutils.geom import Naca4AirfoilCurve
+import numpy as np
+
 
 class HorizontalTail(GeomBase):
     horizontal_airfoil = Input()
@@ -11,6 +13,11 @@ class HorizontalTail(GeomBase):
     surface = Input()
     span = Input()
     horizontal_tail_mass = Input()
+    Lt_h = Input()
+    Nz = Input()
+    tow = Input()
+    Fw = Input()
+    Se = Input(114.9*.3048 ** 2)
 
     @Part
     def horizontal_tail_airfoil(self):
@@ -71,6 +78,16 @@ class HorizontalTail(GeomBase):
     @Attribute
     def cg_x(self):
         return self.horizontal_tail.cog[0]
+
+    @Attribute
+    def class2_weight(self):
+        Kuht = 1  # non-unit horizontal tail
+        Ky = 0.3 * self.Lt_h / 0.3048 # AC radius of gyration ~0.3Lt
+        sweep_ht = np.arctan(2 / self.A_h * (1 - self.taper_ratio_h) / (1 + self.taper_ratio_h))
+        return 0.45359 * (0.0379 * Kuht / (1 + self.Fw / self.span_h) ** 0.25 * (self.tow/ 0.45359) ** 0.639 * self.Nz ** 0.1
+                          * (self.surface_h/ 0.3048**2) ** 0.75 / (self.Lt_h/ 0.3048) * Ky ** 0.704 * self.A_h ** 0.166 / np.cos(sweep_ht)
+                          * (1 + self.Se / self.surface_h) ** 0.1)
+
     @Part
     def root_airfoil_h(self):
         return ScaledCurve(curve_in=self.horizontal_tail_airfoil, reference_point=self.position.point, factor=self.root_chord_h)

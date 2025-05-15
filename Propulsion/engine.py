@@ -15,6 +15,7 @@ class Engines(GeomBase):
     A = Input()
     N_engines = Input()
     span = Input()
+    Nz = Input()
 
     @Attribute
     def power_to(self):
@@ -58,9 +59,19 @@ class Engines(GeomBase):
     @Attribute
     def pos_engine(self):
         if self.N_engines == 2:
-            return np.array([0.35 * self.span / 2, -0.35 * self.span / 2])
+            pos = np.array([0.35 * self.span / 2, -0.35 * self.span / 2])
         elif self.N_engines == 4:
-            return np.array([0.4 * self.span / 2, 0.7 * self.span / 2, -0.4 * self.span / 2, -0.7 * self.span / 2])
+            pos = np.array([0.4 * self.span / 2, 0.7 * self.span / 2, -0.4 * self.span / 2, -0.7 * self.span / 2])
+        return pos
+
+    @Attribute
+    def class2_weight(self):
+        Kng = 1     # Non-pylon-mounted nacelle
+        Kp = 1.4    # propeller engine
+        Ktr = 1     # non- jet thrust reverser engine
+        W_ec = 2.331 * (self.single_mass/.45359) ** 0.901 * Kp * Ktr
+        return 0.45359 * (0.6724 * Kng * (self.l_ee/.3048) ** 0.1 * (self.w_ee/.3048) ** 0.294 * self.Nz ** 0.119
+                          * W_ec ** 0.611 * self.N_engines ** 0.984 * (self.engines.first.area /.3048**2) ** 0.224)
 
     @Part
     def engines(self):
