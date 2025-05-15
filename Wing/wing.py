@@ -15,6 +15,9 @@ class Wing(GeomBase):
     airfoil_name_root = Input()
     airfoil_name_tip = Input()
     wing_mass = Input()
+    Nz = Input()
+    Scsw = Input(2*55 * .3048 ** 2)
+    Nt = Input()
 
 
     @Attribute
@@ -77,6 +80,16 @@ class Wing(GeomBase):
     @Attribute
     def cg_x(self):
         return self.wing.cog[0]
+
+    @Attribute
+    def Kws_ratio(self):
+        return 0.75 * ((1 + 2 * self.taper_ratio)/(1 + self.taper_ratio)) * self.span/.3048
+
+    @Attribute
+    def class2_weight(self):
+        return 0.45359 * (0.0051 * (self.tow/ 0.45359 * self.Nz) ** 0.557 * (self.surface/0.3048**2) ** 0.649 * self.A ** 0.5
+                          / self.thickness_ratio ** 0.4 * (1 + self.taper_ratio) ** 0.1 * (self.Scsw/0.3048**2) ** 0.1)
+
     @Part
     def root_airfoil(self):
         return Airfoil(airfoil_name=self.airfoil_name_root, chord=self.root_chord, position=self.position)
@@ -100,10 +113,11 @@ class Wing(GeomBase):
     def fueltank(self):
         return FuelTank(airfoil_name_root=self.airfoil_name_root, airfoil_name_tip=self.airfoil_name_tip, span=self.span,
                         root_chord=self.root_chord, tip_chord=self.tip_chord, tip_le_offset=self.tip_le_offset,
-                        wall_thickness=0.02, position=self.position)
+                        wall_thickness=0.02, position=self.position, Nt=self.Nt)
 
 
 if __name__ == '__main__':
     from parapy.gui import display
-    wing = Wing(tow=70307*9.81, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip = '64412')
+    wing = Wing(tow=70307, s_to=1093, s_landing=975, h_cr=8535, V_cr=150, A=10.1, airfoil_name_root='64318',
+                airfoil_name_tip='64412', Nz=3, Nt=4)
     display(wing)

@@ -12,6 +12,7 @@ class FuelTank(GeomBase):
     span = Input()
     wall_thickness = Input()
     fueltank_mass = Input()
+    Nt = Input()
 
     @Attribute
     def scaled_factor_x(self):
@@ -24,6 +25,22 @@ class FuelTank(GeomBase):
     @Attribute
     def scaled_factor_z(self):
         return 1 - (2 * self.wall_thickness / (self.root_tank.bbox.bounds[5] - self.root_tank.bbox.bounds[2]))
+
+    @Attribute
+    def Vi(self):
+        return self.outer_surf.volume
+
+    @Attribute
+    def Vp(self):
+        return 0
+
+    @Attribute
+    def Vt(self):
+        return self.Vi + self.Vp
+
+    @Attribute
+    def class2_weight(self):
+        return 0.45359 * (2.405 * (self.Vt * 264.172) ** 0.606 / (1 + self.Vi/self.Vt) * (1 + self.Vp/self.Vt) * self.Nt ** 0.5)
 
     @Part
     def root_profile(self):
@@ -97,7 +114,7 @@ class FuelTank(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = FuelTank(airfoil_name_root='64318', airfoil_name_tip='62218', root_chord=9, tip_chord=2, span=20, wall_thickness=0.05)
+    obj = FuelTank(airfoil_name_root='64318', airfoil_name_tip='62218', root_chord=9, tip_chord=2, span=20, wall_thickness=0.05, Nt=4)
     display(obj)
 
 

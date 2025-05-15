@@ -7,12 +7,12 @@ from kbeutils.geom import Naca4AirfoilCurve
 class VerticalTail(GeomBase):
     vertical_airfoil = Input()
     X_CG = Input()
-    length = Input()
     MAC = Input()
     surface = Input()
     span = Input()
-    x_root_t = Input()
     vertical_tail_mass = Input()
+    length_fuselage = Input()
+
 
 
     @Part
@@ -37,7 +37,7 @@ class VerticalTail(GeomBase):
 
     @Attribute
     def X_v(self):
-        return self.x_root_t
+        return 0.9 * self.length_fuselage
 
     @Attribute
     def sweep_LE_v(self):

@@ -6,11 +6,10 @@ from kbeutils.geom import Naca4AirfoilCurve
 class HorizontalTail(GeomBase):
     horizontal_airfoil = Input()
     X_CG = Input()
-    length = Input()
+    length_fuselage = Input()
     MAC = Input()
     surface = Input()
     span = Input()
-    x_root_t = Input()
     horizontal_tail_mass = Input()
 
     @Part
@@ -36,8 +35,7 @@ class HorizontalTail(GeomBase):
 
     @Attribute
     def X_h(self):
-        return self.x_root_t
-
+        return 0.9 * self.length_fuselage
     @Attribute
     def S_wing(self):
         return self.surface
@@ -107,6 +105,6 @@ class HorizontalTail(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = Horizontal_tail(horizontal_airfoil='0018',X_CG=5,length=20,MAC=4,surface=200,span=20,x_root_t=9)
+    obj = Horizontal_tail(horizontal_airfoil='0018',X_CG=5,length_fuselage=20,MAC=4,surface=200,span=20,x_root_t=9)
 
     display(obj)
