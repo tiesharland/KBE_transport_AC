@@ -104,11 +104,13 @@ class Wing(GeomBase):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=(self.root_chord-self.tip_chord)/4, y=self.span/-2))
 
+
     @Part
     def wing(self):
-        return RuledShell(profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
-                          position=self.position)
-
+        return RuledSolid(
+            profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
+            position=self.position
+        )
     @Part
     def fueltank(self):
         return FuelTank(airfoil_name_root=self.airfoil_name_root, airfoil_name_tip=self.airfoil_name_tip, span=self.span,

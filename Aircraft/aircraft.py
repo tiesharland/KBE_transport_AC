@@ -143,17 +143,21 @@ class Aircraft(GeomBase):
     def cg_total(self):
         return (((self.fuselage.cargo.cg_x * self.fuselage.cargo.mass) + (self.fuselage.cg_x * self.fuselage.class2_weight)
                 + (self.wing.cg_x * self.wing.class2_weight) + (self.wing.fueltank.cg_x * self.wing.fueltank.class2_weight)
-                + (self.horizontaltail.cg_x * self.horizontal.class2_weight) + (self.verticaltail.cg_x * self.vertical.class2_weight))
+                + (self.horizontaltail.cg_x * self.horizontaltail.class2_weight) + (self.verticaltail.cg_x * self.verticaltail.class2_weight))
                 /(self.fuselage.cargo.mass + self.fuselage.class2_weight + self.wing.class2_weight + self.wing.fueltank.class2_weight + self.verticaltail.class2_weight + self.horizontaltail.class2_weight))
+
+
 
     @Part
     def STEP(self):
         return STEPWriter(default_directory=DIR,
-                          nodes=[self.fuselage,
-                                 self.wing,
-                                 self.propulsion,
-                                 self.horizontaltail,
-                                 self.verticaltail])
+                        nodes=[self.wing.wing,
+                               self.fuselage.fuselage,
+                               *[self.propulsion.engines[i] for i in range(self.N_engines)],
+                               self.verticaltail.vertical_tail,
+                               self.horizontaltail.horizontal_tail])
+
+
 
 if __name__ == '__main__':
     from parapy.gui import display

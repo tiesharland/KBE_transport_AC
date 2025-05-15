@@ -122,7 +122,7 @@ class VerticalTail(GeomBase):
 
     @Part
     def vertical_tail(self):
-        return LoftedSurface(
+        return LoftedSolid(
             profiles=[self.root_airfoil_v_translated, self.tip_airfoil_v_translated],
         )
 

@@ -115,7 +115,7 @@ class HorizontalTail(GeomBase):
 
     @Part
     def horizontal_tail(self):
-        return LoftedSurface(profiles=[self.tip_airfoil_h_translated_mirrored,self.root_airfoil_h, self.tip_airfoil_h_translated])
+        return LoftedSolid(profiles=[self.tip_airfoil_h_translated_mirrored,self.root_airfoil_h, self.tip_airfoil_h_translated])
 
 
 

@@ -90,6 +90,7 @@ class Fuselage(GeomBase):
         return RuledSolid(profiles=self.profiles, mesh_deflection=0.0001)
 
 
+
 if __name__ == "__main__":
     from parapy.gui import display
     fus = Fuselage(num_crates=2, num_vehicles=2, num_persons=9, Nz=3, tow=70307, Kws_ratio=50)
