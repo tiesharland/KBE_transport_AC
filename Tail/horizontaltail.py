@@ -59,6 +59,7 @@ class HorizontalTail(GeomBase):
     def root_chord_h(self):
         return (2 * self.surface_h) / (1 + self.taper_ratio_h) / self.span_h
 
+
     @Attribute
     def MAC_h(self):
         return 2/3 * self.root_chord_h * (1 + self.taper_ratio_h + self.taper_ratio_h**2) / (1 + self.taper_ratio_h)

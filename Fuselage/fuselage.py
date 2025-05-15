@@ -47,6 +47,7 @@ class Fuselage(GeomBase):
         return self.length / self.radius / 2
 
 
+
     # @fineness.validator
     # def fineness_validator(self, value):
     #     if value >

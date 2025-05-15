@@ -1,5 +1,6 @@
 from parapy.core import *
 from parapy.geom import *
+from math import *
 from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
@@ -157,7 +158,13 @@ class Aircraft(GeomBase):
                                self.verticaltail.vertical_tail,
                                self.horizontaltail.horizontal_tail])
 
+    @Attribute
+    def V_h(self):
+        return (self.horizontaltail.surface_h * (self.horizontaltail.X_h - self.cg_total)) / (self.wing.surface * self.wing.MAC)
 
+    @Attribute
+    def neutralpoint(self):
+        return (5.7 /2 * pi) * self.V_h * (1 - 0.40) * self.wing.MAC
 
 if __name__ == '__main__':
     from parapy.gui import display
