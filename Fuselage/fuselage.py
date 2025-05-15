@@ -78,11 +78,16 @@ class Fuselage(GeomBase):
         return TailCone(radius=self.radius, tail_fineness=self.tail_fineness, divergence_angle=self.divergence_angle,
                         position=self.position.translate(x=self.tail_start))
 
+    @Attribute
+    def profiles(self):
+        n = [p for p in self.nosecone.profiles]
+        c = [p for p in self.cargo.profiles]
+        t = [p for p in self.tailcone.profiles]
+        return n + c + t
+
     @Part
     def fuselage(self):
-        return SewnShell([LoftedSurface(profiles=self.nosecone.profiles, mesh_deflection=0.0001),
-                          LoftedSurface(profiles=self.cargo.profiles, mesh_deflection=0.0001),
-                          LoftedSurface(profiles=self.tailcone.profiles, mesh_deflection=0.0001)])
+        return RuledSolid(profiles=self.profiles, mesh_deflection=0.0001)
 
 
 if __name__ == "__main__":
