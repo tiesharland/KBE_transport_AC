@@ -180,14 +180,17 @@ if __name__ == '__main__':
     #
     # display(cargo)
 
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     excel_path = os.path.join(base_dir, "aircraft_inputs.xlsx")
-    df = pd.read_excel(excel_path)
 
-    excel_inputs = df.set_index(df.columns[0])[df.columns[1]].to_dict()
+    df = pd.read_excel(excel_path, header=None, skiprows=1)
+
+    keys = df.iloc[:, 0].tolist()
+    values = df.iloc[:, 1].tolist()
 
     inputs = {}
-    for key, val in excel_inputs.items():
+    for key, val in zip(keys, values):
         if key in ["airfoil_name_root", "airfoil_name_tip", "horizontal_airfoil", "vertical_airfoil"]:
             val = str(val)
             if val.endswith(".0"):
@@ -198,6 +201,5 @@ if __name__ == '__main__':
                 inputs[key] = int(val)
             else:
                 inputs[key] = val
-
     cargo = Aircraft(**inputs)
     display(cargo)
