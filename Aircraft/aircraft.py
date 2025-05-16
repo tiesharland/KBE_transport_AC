@@ -14,7 +14,6 @@ from parapy.exchange.step import STEPWriter
 import warnings
 import os
 import pandas as pd
-
 DIR = str(os.getcwd())
 
 if not os.path.exists(DIR):
@@ -167,7 +166,34 @@ class Aircraft(GeomBase):
     @Attribute
     def neutralpoint(self):
         return (1 /2 * pi) * self.V_h * (1 - 0.40) * self.wing.MAC
+    def generate_warning(warning_header, msg):
+        """
+        This function generates a warning dialog box
+        :param warning_header: The text to be shown on the dialog box header
+        :param msg: the message to be shown in dialog box
+        :return: None as it is GUI operation
+        """
+        # tkinter is the GUI library used by the ParaPy desktop GUI
+        from tkinter import Tk, messagebox
 
+        # initialization
+        window = Tk()
+        window.withdraw()
+
+        # generates message box and waits for user to close it
+        messagebox.showwarning(warning_header, msg)
+
+        # close the message window, terminate the associated process
+        window.deiconify()
+        window.destroy()
+        window.quit()
+
+    @Attribute
+    def stability(self):
+        if self.cg_total > self.neutralpoint:
+            msg = f"The center of gravity ({self.cg_total}) should be infront of the neutral point({self.neutralpoint})"
+
+            Aircraft.generate_warning(msg, msg)
 
 
 
