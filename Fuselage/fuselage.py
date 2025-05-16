@@ -88,7 +88,7 @@ class Fuselage(GeomBase):
 
     @Part
     def fuselage(self):
-        return RuledSolid(profiles=self.profiles, mesh_deflection=0.0001)
+        return RuledSolid(profiles=self.profiles,color=[107, 142, 35], mesh_deflection=0.0001)
 
 
 

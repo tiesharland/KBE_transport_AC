@@ -98,7 +98,7 @@ class FuelTank(GeomBase):
     @Part
     def outer_surf(self):
         return RuledSolid(profiles=[self.tip_tank_left, self.root_tank, self.tip_tank_right],
-                          transparency=0.4, position=self.position)
+                          transparency=0.4, position=self.position, color=[128, 128, 128])
 
     # @Part
     # def inner_surf(self):

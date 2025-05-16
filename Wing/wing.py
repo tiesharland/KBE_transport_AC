@@ -109,7 +109,7 @@ class Wing(GeomBase):
     def wing(self):
         return RuledSolid(
             profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
-            position=self.position
+            position=self.position,color=[107, 142, 35]
         )
     @Part
     def fueltank(self):

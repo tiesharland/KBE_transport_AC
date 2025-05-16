@@ -80,7 +80,8 @@ class Engines(GeomBase):
             width=self.w_ee,
             height=self.h_ee,
             position=self.position.translate(y=self.pos_engine[child.index]).rotate(z=np.deg2rad(270)),
-            quantify=self.N_engines
+            quantify=self.N_engines,
+            color= [128, 128, 128]
         )
 
 
