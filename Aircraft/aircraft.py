@@ -13,6 +13,7 @@ import numpy as np
 from parapy.exchange.step import STEPWriter
 import warnings
 import os
+import pandas as pd
 
 DIR = str(os.getcwd())
 
@@ -162,7 +163,7 @@ class Aircraft(GeomBase):
     @Attribute
     def V_h(self):
         return (self.horizontaltail.surface_h * (self.horizontaltail.X_h - self.cg_total)) / (self.wing.surface * self.wing.MAC)
-
+    #Requires accurate estimation of dcl/dalpha_ tail & dcl/dalpha_wing and depsilon/dalpha
     @Attribute
     def neutralpoint(self):
         return (1 /2 * pi) * self.V_h * (1 - 0.40) * self.wing.MAC
@@ -170,13 +171,33 @@ class Aircraft(GeomBase):
 
 
 
-
 if __name__ == '__main__':
     from parapy.gui import display
+    #
+    # cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, R=4000000, s_to=1093, s_landing=975, h_cr=8535,
+    #                  V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412', N_engines=4, root_le=0.4,
+    #                  horizontal_airfoil='0018', vertical_airfoil='0018', cl_cr=0.4, AoA=2, mach=0.49, Nz=3)
+    #
+    # display(cargo)
 
-    cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, R=4000000, s_to=1093, s_landing=975, h_cr=8535,
-                     V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412', N_engines=4, root_le=0.4,
-                     horizontal_airfoil='0018', vertical_airfoil='0018', cl_cr=0.4, AoA=2, mach=0.49, Nz=3)
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    excel_path = os.path.join(base_dir, "aircraft_inputs.xlsx")
+    df = pd.read_excel(excel_path)
 
+    excel_inputs = df.set_index(df.columns[0])[df.columns[1]].to_dict()
+
+    inputs = {}
+    for key, val in excel_inputs.items():
+        if key in ["airfoil_name_root", "airfoil_name_tip", "horizontal_airfoil", "vertical_airfoil"]:
+            val = str(val)
+            if val.endswith(".0"):
+                val = val[:-2]
+            inputs[key] = val.strip("'").zfill(4)
+        else:
+            if isinstance(val, float) and val.is_integer():
+                inputs[key] = int(val)
+            else:
+                inputs[key] = val
+
+    cargo = Aircraft(**inputs)
     display(cargo)
-
