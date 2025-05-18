@@ -188,7 +188,7 @@ class Aircraft(GeomBase):
     @action(label="Create output file", button_label="Click here to create output Excel file")
     def output(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        excel_path = os.path.join(base_dir, "aircraft_outputs.xlsx")
+        excel_path = os.path.join(os.path.dirname(base_dir), "aircraft_outputs.xlsx")
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Output design parameters"
