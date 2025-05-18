@@ -51,10 +51,10 @@ class Estimation(Base):
     @Attribute
     def class2(self):
         return ClassII(self.class1[1], self.Nz, self.surface, self.length, self.thickness, self.Sf, self.span,
-                                       self.A, self.taper_ratio, self.Scsw, self.Lt_h, self.Lt_v, self.thickness_ratio,
-                                       self.Fw, self.span_h, self.surface_h, self.A_h, self.taper_ratio_h, self.Se,
-                                       self.A_v, self.surface_v, self.taper_ratio_v, self.sweep_LE_v, self.ttail,
-                                         self.Vi, self.Vp, self.Vt, self.Nt)
+                       self.A, self.taper_ratio, self.Scsw, self.Lt_h, self.Lt_v, self.thickness_ratio, self.Fw,
+                       self.span_h, self.surface_h, self.A_h, self.taper_ratio_h, self.Se, self.A_v, self.surface_v,
+                       self.taper_ratio_v, self.sweep_LE_v, self.ttail, self.Vi, self.Vp, self.Vt, self.Nt, self.W_eng,
+                       self.l_ee, self.w_ee, self.Num_engines, self.Sn)
 
     @Attribute
     def converge(self):

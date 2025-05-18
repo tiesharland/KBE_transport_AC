@@ -43,6 +43,10 @@ class VerticalTail(GeomBase):
         return 0.9 * self.length_fuselage
 
     @Attribute
+    def pos(self):
+        return min(self.X_v, self.length_fuselage - self.root_chord_v)
+
+    @Attribute
     def thickness_ratio_v(self):
         return int(self.vertical_airfoil[-2:])
 
@@ -128,5 +132,5 @@ class VerticalTail(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = Vertical_tail(vertical_airfoil = '0018', X_CG = 5, length = 20, MAC = 4, surface = 200, span = 20,x_root_t=9)
+    obj = VerticalTail(vertical_airfoil = '0018', X_CG = 5, length = 20, MAC = 4, surface = 200, span = 20,x_root_t=9)
     display(obj)

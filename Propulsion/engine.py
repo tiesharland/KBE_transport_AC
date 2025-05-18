@@ -70,8 +70,9 @@ class Engines(GeomBase):
         Kp = 1.4    # propeller engine
         Ktr = 1     # non- jet thrust reverser engine
         W_ec = 2.331 * (self.single_mass/.45359) ** 0.901 * Kp * Ktr
-        return 0.45359 * (0.6724 * Kng * (self.l_ee/.3048) ** 0.1 * (self.w_ee/.3048) ** 0.294 * self.Nz ** 0.119
-                          * W_ec ** 0.611 * self.N_engines ** 0.984 * (self.engines.first.area /.3048**2) ** 0.224)
+        return (0.45359 * (0.6724 * Kng * (self.l_ee/.3048) ** 0.1 * (self.w_ee/.3048) ** 0.294 * self.Nz ** 0.119
+                           * W_ec ** 0.611 * self.N_engines ** 0.984 * (self.engines.first.area / .3048**2) ** 0.224)
+                + self.N_engines * self.single_mass)
 
     @Part
     def engines(self):
@@ -81,14 +82,13 @@ class Engines(GeomBase):
             height=self.h_ee,
             position=self.position.translate(y=self.pos_engine[child.index]).rotate(z=np.deg2rad(270)),
             quantify=self.N_engines,
-            color= [128, 128, 128]
+            color=[128, 128, 128]
         )
-
 
 
 if __name__ == '__main__':
     from parapy.gui import display
-    engines = Engines(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, N_engines=4,span=20)
+    engines = Engines(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, N_engines=4, span=20)
     display(engines)
 
 

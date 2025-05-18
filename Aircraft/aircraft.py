@@ -40,6 +40,7 @@ class Aircraft(GeomBase):
     AoA = Input()
     mach = Input()
     Nz = Input(3)
+    Nt = Input(2)
 
     @Attribute
     def engine_attachment(self):
@@ -49,7 +50,7 @@ class Aircraft(GeomBase):
 
     @Attribute
     def x_root_wing(self):
-        return self.root_le*self.fuselage.cargo.length
+        return self.root_le * self.fuselage.cargo.length
 
     @Attribute
     def x_lemac(self):
@@ -72,6 +73,11 @@ class Aircraft(GeomBase):
         return ClassI(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons, R=self.R)
 
     @Attribute
+    def oew(self):
+        return sum(p.class2_weight for p in [self.wing, self.fuselage, self.propulsion, self.wing.fueltank,
+                                             self.horizontaltail, self.verticaltail])
+
+    @Attribute
     def class2(self):
         return ClassII(W_to=self.class1.wto, Nz=self.Nz, Sw=self.wing.surface, L=self.fuselage.length, D=self.fuselage.thickness,
                        Sf=self.fuselage.fuselage.area, span=self.wing.span, A=self.A, taper=self.wing.taper_ratio,
@@ -81,7 +87,8 @@ class Aircraft(GeomBase):
                        S_vt=self.verticaltail.surface_v, taper_v=self.verticaltail.taper_ratio_v,
                        tc_vt=self.verticaltail.thickness_ratio_v, sweep_le_v=self.verticaltail.sweep_LE_v,
                        ttail=0, Vi=self.wing.fueltank.outer_surf.volume, Vp=0, Vt=self.wing.fueltank.outer_surf.volume,
-                       Nt=self.N_engines)
+                       Nt=self.Nt, l_ee=self.propulsion.l_ee, w_ee=self.propulsion.w_ee, N_engines=self.N_engines,
+                       W_eng=self.propulsion.single_mass)
 
     # @Attribute
     # def weight(self):
@@ -106,32 +113,33 @@ class Aircraft(GeomBase):
     @Part
     def wing(self):
         return Wing(pass_down='s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip', tow=self.class1.wto,
-                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius), Nz=self.Nz, Nt=self.N_engines)
+                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius), Nz=self.Nz, Nt=self.Nt)
 
     @Part
     def propulsion(self):
         return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines, Nz', span=self.wing.span, tow=self.class1.wto,
-                       position=self.wing.position)
+                       position=self.wing.position.translate(z=-self.propulsion.h_ee))
 
     @Part
     def horizontaltail(self):
         return HorizontalTail(pass_down='horizontal_airfoil', length_fuselage=self.fuselage.length, MAC=self.wing.MAC,
                               surface=self.wing.surface, span=self.wing.span, X_CG=self.cg_tail_off,
-                              position=self.position.translate(x=self.horizontaltail.X_h, z=self.fuselage.radius),
+                              position=self.position.translate(x=self.horizontaltail.pos, z=self.fuselage.radius),
                               tow=self.class1.wto, Nz=self.Nz, Fw=self.Fw, Lt_h=self.Lt_h)
 
     @Part
     def verticaltail(self):
         return VerticalTail(pass_down='vertical_airfoil', length_fuselage=self.fuselage.length, MAC=self.wing.MAC,
                             surface=self.wing.surface, span=self.wing.span, X_CG=self.cg_tail_off,
-                            position=self.position.translate(x=self.verticaltail.X_v, z=self.fuselage.radius),
+                            position=self.position.translate(x=self.verticaltail.pos, z=self.fuselage.radius),
                             tow=self.class1.wto, Nz=self.Nz, Lt_v=self.Lt_v)
+
     @Part
     def AVL(self):
         return AVL(pass_down='cl_cr,AoA,mach', airfoil_name_root=self.wing.airfoil_name_root,
-                   root_chord=self.wing.root_chord,airfoil_name_tip = self.wing.airfoil_name_tip,
-                   tip_chord=self.wing.tip_chord,tip_le_offset = self.wing.tip_le_offset,
-                   surface=self.wing.surface,span = self.wing.span,MAC = self.wing.MAC,
+                   root_chord=self.wing.root_chord, airfoil_name_tip=self.wing.airfoil_name_tip,
+                   tip_chord=self.wing.tip_chord, tip_le_offset=self.wing.tip_le_offset,
+                   surface=self.wing.surface, span=self.wing.span, MAC=self.wing.MAC,
                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
 
     #Add engines
@@ -143,35 +151,38 @@ class Aircraft(GeomBase):
 
     @Attribute
     def cg_total(self):
-        return (((self.fuselage.cargo.cg_x * self.fuselage.cargo.mass) + (self.fuselage.cg_x * self.fuselage.class2_weight)
-                + (self.wing.cg_x * self.wing.class2_weight) + (self.wing.fueltank.cg_x * self.wing.fueltank.class2_weight)
-                + (self.horizontaltail.cg_x * self.horizontaltail.class2_weight) + (self.verticaltail.cg_x * self.verticaltail.class2_weight))
-                /(self.fuselage.cargo.mass + self.fuselage.class2_weight + self.wing.class2_weight + self.wing.fueltank.class2_weight + self.verticaltail.class2_weight + self.horizontaltail.class2_weight))
-
-
+        return (((self.fuselage.cargo.cg_x * self.fuselage.cargo.mass)
+                 + (self.fuselage.cg_x * self.fuselage.class2_weight) + (self.wing.cg_x * self.wing.class2_weight)
+                 + (self.wing.fueltank.cg_x * self.wing.fueltank.class2_weight)
+                 + (self.horizontaltail.cg_x * self.horizontaltail.class2_weight)
+                 + (self.verticaltail.cg_x * self.verticaltail.class2_weight))
+                / (self.fuselage.cargo.mass + self.fuselage.class2_weight + self.wing.class2_weight
+                   + self.wing.fueltank.class2_weight + self.verticaltail.class2_weight
+                   + self.horizontaltail.class2_weight))
 
     @Part
     def STEP(self):
         return STEPWriter(default_directory=DIR,
-                        nodes=[self.wing.wing,
-                               self.fuselage.fuselage,
-                               *[self.propulsion.engines[i] for i in range(self.N_engines)],
-                               self.verticaltail.vertical_tail,
-                               self.horizontaltail.horizontal_tail])
+                          nodes=[self.wing.wing, self.fuselage.fuselage,
+                                 * [self.propulsion.engines[i] for i in range(self.N_engines)],
+                                 self.verticaltail.vertical_tail, self.horizontaltail.horizontal_tail])
 
     @Attribute
     def V_h(self):
-        return (self.horizontaltail.surface_h * (self.horizontaltail.X_h - self.cg_total)) / (self.wing.surface * self.wing.MAC)
+        return ((self.horizontaltail.surface_h * (self.horizontaltail.X_h - self.cg_total))
+                / (self.wing.surface * self.wing.MAC))
+
     #Requires accurate estimation of dcl/dalpha_ tail & dcl/dalpha_wing and depsilon/dalpha
     @Attribute
     def neutralpoint(self):
-        return (1 /2 * pi) * self.V_h * (1 - 0.40) * self.wing.MAC
+        return (1 / 2 * pi) * self.V_h * (1 - 0.40) * self.wing.MAC
+
     def generate_warning(warning_header, msg):
         """
         This function generates a warning dialog box
         :param warning_header: The text to be shown on the dialog box header
         :param msg: the message to be shown in dialog box
-        :return: None as it is GUI operation
+        :return: None as it is a GUI operation
         """
         # tkinter is the GUI library used by the ParaPy desktop GUI
         from tkinter import Tk, messagebox

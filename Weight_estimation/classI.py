@@ -8,6 +8,8 @@ class ClassI(Base):
     num_vehicles = Input()
     num_persons = Input()
     R = Input()
+    a = Input(0.5482)
+    b = Input(486.68)
     ld_cr = Input(14)
     eff_p = Input(0.82)
     cp = Input(.6 * 1.68965941e-7)
@@ -34,11 +36,11 @@ class ClassI(Base):
         return 2 * 100 * 9.80655
 
     @Attribute
-    def weights(self):
-        Mtfo = 0.005
-        a = 0.5482
-        b = 486.68
+    def Mtfo(self):
+        return 0.005
 
+    @Attribute
+    def Mff(self):
         ff1 = .990
         ff2 = .990
         ff3 = .995
@@ -46,27 +48,19 @@ class ClassI(Base):
         ff7 = .990
         ff8 = .992
         ff5 = 1 / np.exp(self.R / self.eff_p * self.cp * 9.80655 / self.ld_cr)
-        Mff = ff1 * ff2 * ff3 * ff4 * ff5 * ff7 * ff8
-
-        if self.W_OE:
-            oew = self.W_OE
-        else:
-            wto = (b + self.w_crew + self.w_payload) / (Mff - a - Mtfo)
-            oew = a * wto + b + wto * Mtfo + self.w_crew
-
-        return oew/9.80655, wto/9.80655, (1-Mff)*wto/9.80655
-
-    @Attribute
-    def oew(self):
-        return self.weights[0]
+        return ff1 * ff2 * ff3 * ff4 * ff5 * ff7 * ff8
 
     @Attribute
     def wto(self):
-        return self.weights[1]
+        return (self.b + self.w_crew + self.w_payload) / (self.Mff - self.a - self.Mtfo) / 9.80655
 
     @Attribute
-    def w_fuel(self):
-        return self.weights[2]
+    def oew(self):
+        return (self.a * self.wto * 9.80655 + self.b + self.wto * 9.80655 * self.Mtfo + self.w_crew) / 9.80655
+
+    @Attribute
+    def wfuel(self):
+        return (1 - self.Mff) * self.wto
 
 
 if __name__ == '__main__':

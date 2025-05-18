@@ -36,6 +36,12 @@ class ClassII(Base):
     Vp = Input()
     Vt = Input()
     Nt = Input()
+    W_eng = Input()
+    l_ee = Input()
+    w_ee = Input()
+    N_engines = Input()
+    Sn = Input()
+
 
     @W_to.preprocessor
     def W_to(self, value):
@@ -105,6 +111,22 @@ class ClassII(Base):
     def Vt(self, value):
         return value * 264.172
 
+    @l_ee.preprocessor
+    def l_ee(self, value):
+        return value / 0.3048
+
+    @w_ee.preprocessor
+    def w_ee(self, value):
+        return value / 0.3048
+
+    @W_eng.preprocessor
+    def W_eng(self, value):
+        return value / 0.45359
+
+    @Sn.preprocessor
+    def Sn(self, value):
+        return value / (0.3048 ** 2)
+
     # N_Lt = N_Lt / 0.3048
     # N_w = N_w / 0.3048
     # W_eng = W_eng / 0.45359
@@ -144,12 +166,21 @@ class ClassII(Base):
     def W_ft(self):
         return 0.45359 * (2.405 * self.Vt ** 0.606 / (1 + self.Vi/self.Vt) * (1 + self.Vp/self.Vt) * self.Nt ** 0.5)
 
-    # Kmp, Knp = 1, 1 # Non-kneeling gear
+    @Attribute
+    def ew(self):
+        return self.W_w + self.W_f + self.W_ft + self.W_ht + self.W_vt
 
-    # Kng = 1     # Non-pylon-mounted nacelle
-    # Kp = 1.4    # propeller engine
-    # Ktr = 1     # non- jet thrust reverser engine
-    # W_ec = 2.331 * W_eng ** 0.901 * Kp * Ktr
-    # W_nacelle = 0.6724 * Kng * N_Lt ** 0.1 * N_w ** 0.294 * Nz ** 0.119 * W_ec ** 0.611 * N_en ** 0.984 * Sn ** 0.224
+    @Attribute
+    def W_ne(self):
+        Kmp, Knp = 1, 1 # Non-kneeling gear
+
+        Kng = 1     # Non-pylon-mounted nacelle
+        Kp = 1.4    # propeller engine
+        Ktr = 1     # non- jet thrust reverser engine
+        W_ec = 2.331 * self.W_eng ** 0.901 * Kp * Ktr
+        return 0.45359 * (0.6724 * Kng * self.l_ee ** 0.1 * self.w_ee ** 0.294 * self.Nz ** 0.119 * W_ec ** 0.611
+                * self.N_engines ** 0.984 * self.Sn ** 0.224 + self.W_eng)
+
+
 
     # W_eng_cont = 5 * N_en + 0.8 * L_ec

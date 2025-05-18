@@ -43,6 +43,11 @@ class HorizontalTail(GeomBase):
     @Attribute
     def X_h(self):
         return 0.9 * self.length_fuselage
+
+    @Attribute
+    def pos(self):
+        return min(self.X_h, self.length_fuselage - self.root_chord_h)
+
     @Attribute
     def S_wing(self):
         return self.surface
@@ -58,7 +63,6 @@ class HorizontalTail(GeomBase):
     @Attribute
     def root_chord_h(self):
         return (2 * self.surface_h) / (1 + self.taper_ratio_h) / self.span_h
-
 
     @Attribute
     def MAC_h(self):
@@ -85,8 +89,8 @@ class HorizontalTail(GeomBase):
         Kuht = 1  # non-unit horizontal tail
         Ky = 0.3 * self.Lt_h / 0.3048 # AC radius of gyration ~0.3Lt
         sweep_ht = np.arctan(2 / self.A_h * (1 - self.taper_ratio_h) / (1 + self.taper_ratio_h))
-        return 0.45359 * (0.0379 * Kuht / (1 + self.Fw / self.span_h) ** 0.25 * (self.tow/ 0.45359) ** 0.639 * self.Nz ** 0.1
-                          * (self.surface_h/ 0.3048**2) ** 0.75 / (self.Lt_h/ 0.3048) * Ky ** 0.704 * self.A_h ** 0.166 / np.cos(sweep_ht)
+        return 0.45359 * (0.0379 * Kuht / (1 + self.Fw / self.span_h) ** 0.25 * (self.tow / 0.45359) ** 0.639 * self.Nz ** 0.1
+                          * (self.surface_h/ 0.3048**2) ** 0.75 / (self.Lt_h / 0.3048) * Ky ** 0.704 * self.A_h ** 0.166 / np.cos(sweep_ht)
                           * (1 + self.Se / self.surface_h) ** 0.1)
 
     @Part
@@ -123,6 +127,6 @@ class HorizontalTail(GeomBase):
 
 if __name__ == '__main__':
     from parapy.gui import display
-    obj = Horizontal_tail(horizontal_airfoil='0018',X_CG=5,length_fuselage=20,MAC=4,surface=200,span=20,x_root_t=9)
+    obj = HorizontalTail(horizontal_airfoil='0018',X_CG=5,length_fuselage=20,MAC=4,surface=200,span=20,x_root_t=9)
 
     display(obj)
