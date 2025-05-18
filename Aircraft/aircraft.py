@@ -11,15 +11,15 @@ from Weight_estimation.classII import ClassII
 from AVL.AVL_analysis import AVL
 import numpy as np
 from parapy.exchange.step import STEPWriter
-import warnings
+from Warnings_Errors.gen_warning import generate_warning
+import openpyxl
 import os
-import pandas as pd
 DIR = str(os.getcwd())
 
 if not os.path.exists(DIR):
     os.makedirs(DIR)
 
-import os
+
 class Aircraft(GeomBase):
     num_crates = Input()
     num_vehicles = Input()
@@ -172,44 +172,39 @@ class Aircraft(GeomBase):
         return ((self.horizontaltail.surface_h * (self.horizontaltail.X_h - self.cg_total))
                 / (self.wing.surface * self.wing.MAC))
 
-    #Requires accurate estimation of dcl/dalpha_ tail & dcl/dalpha_wing and depsilon/dalpha
     @Attribute
     def neutralpoint(self):
+    #Requires accurate estimation of dcl/dalpha_ tail & dcl/dalpha_wing and depsilon/dalpha
         return (1 / 2 * pi) * self.V_h * (1 - 0.40) * self.wing.MAC
-
-    def generate_warning(warning_header, msg):
-        """
-        This function generates a warning dialog box
-        :param warning_header: The text to be shown on the dialog box header
-        :param msg: the message to be shown in dialog box
-        :return: None as it is a GUI operation
-        """
-        # tkinter is the GUI library used by the ParaPy desktop GUI
-        from tkinter import Tk, messagebox
-
-        # initialization
-        window = Tk()
-        window.withdraw()
-
-        # generates message box and waits for user to close it
-        messagebox.showwarning(warning_header, msg)
-
-        # close the message window, terminate the associated process
-        window.deiconify()
-        window.destroy()
-        window.quit()
 
     @Attribute
     def stability(self):
         if self.cg_total > self.neutralpoint:
-            msg = f"The center of gravity ({self.cg_total}) should be infront of the neutral point({self.neutralpoint})"
+            head = "Aircraft is not longitudinally stable:"
+            msg = (f"The center of gravity ({self.cg_total}) should be in front of the neutral "
+                   f"point({self.neutralpoint}).")
+            generate_warning(head, msg)
 
-            Aircraft.generate_warning(msg, msg)
+    @action(label="Create output file", button_label="Click here to create output Excel file")
+    def output(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        excel_path = os.path.join(base_dir, "aircraft_outputs.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Output design parameters"
+        ws.append(["Parameter", "Value", "Unit"])
+        ws.append(["TOW", self.class1.wto, 'kg'])
+        ws.append(["OEW", self.oew, 'kg'])
+        ws.append(["Wingspan", self.wing.span, 'm'])
+
+        wb.save(excel_path)
+        print(f"Output file created in {excel_path}")
 
 
 
 if __name__ == '__main__':
     from parapy.gui import display
+    import pandas as pd
     #
     # cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, R=4000000, s_to=1093, s_landing=975, h_cr=8535,
     #                  V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412', N_engines=4, root_le=0.4,
