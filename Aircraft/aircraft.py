@@ -36,7 +36,6 @@ class Aircraft(GeomBase):
     root_le = Input()
     horizontal_airfoil = Input()
     vertical_airfoil = Input()
-    cl_cr = Input()
     AoA = Input()
     mach = Input()
     Nz = Input(3)
@@ -136,7 +135,7 @@ class Aircraft(GeomBase):
 
     @Part
     def AVL(self):
-        return AVL(pass_down='cl_cr,AoA,mach', airfoil_name_root=self.wing.airfoil_name_root,
+        return AVL(pass_down='AoA,mach', airfoil_name_root=self.wing.airfoil_name_root,
                    root_chord=self.wing.root_chord, airfoil_name_tip=self.wing.airfoil_name_tip,
                    tip_chord=self.wing.tip_chord, tip_le_offset=self.wing.tip_le_offset,
                    surface=self.wing.surface, span=self.wing.span, MAC=self.wing.MAC,
@@ -207,7 +206,7 @@ if __name__ == '__main__':
     #
     # cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, R=4000000, s_to=1093, s_landing=975, h_cr=8535,
     #                  V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412', N_engines=4, root_le=0.4,
-    #                  horizontal_airfoil='0018', vertical_airfoil='0018', cl_cr=0.4, AoA=2, mach=0.49, Nz=3)
+    #                  horizontal_airfoil='0018', vertical_airfoil='0018', AoA=2, mach=0.49, Nz=3)
     #
     # display(cargo)
 

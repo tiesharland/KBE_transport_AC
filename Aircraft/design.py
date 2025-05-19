@@ -19,7 +19,6 @@ class Design(GeomBase):
     root_le = Input()
     horizontal_airfoil = Input()
     vertical_airfoil = Input()
-    cl_cr = Input()
     AoA = Input()
     mach = Input()
     Nz = Input(3)

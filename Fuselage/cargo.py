@@ -35,18 +35,15 @@ class Cargo(GeomBase):
     @Attribute
     def length(self):
         l = self.vehicles.length + self.crates.length + self.personnel.length
-        if l == 0:
-            return self.min_length
-        else:
-            return l
+        return max(l, self.personnel.single_length * 5)
 
     @Attribute
     def height(self):
-        return max((self.vehicles.height, self.crates.height, self.personnel.height))
+        return max(max((self.vehicles.height, self.crates.height, self.personnel.height)), self.personnel.single_height)
 
     @Attribute
     def width(self):
-        return max((self.vehicles.width, self.crates.width, self.personnel.width))
+        return max(max((self.vehicles.width, self.crates.width, self.personnel.width)), self.personnel.single_width)
 
     @Attribute
     def minimum_circle(self):

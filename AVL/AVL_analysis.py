@@ -16,7 +16,6 @@ class AVL(GeomBase):
     span = Input()
     MAC = Input()
     mach = Input()
-    cl_cr = Input()
     AoA = Input ()
 
 
@@ -68,16 +67,7 @@ class AVL(GeomBase):
                                  reference_point=self.position.point,
                                  surfaces=self.avl_surfaces,
                                  mach=self.mach)
-    #Fixed CL
-    # @Attribute
-    # def avl_settings(self):
-    #     return {'alpha': avl.Parameter(name='alpha',
-    #                                    setting='CL',
-    #                                    value=self.cl_cr)}
-    # @Part
-    # def avl_case(self):
-    #     return avl.Case(name='fixed_cl',
-    #                     settings=self.avl_settings)
+
     #Fixed AoA
     @Attribute
     def avl_settings(self):

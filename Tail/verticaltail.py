@@ -36,7 +36,7 @@ class VerticalTail(GeomBase):
 
     @Attribute
     def volume_coefficient_v(self):
-        return 0.08
+        return 0.0742
 
     @Attribute
     def X_v(self):

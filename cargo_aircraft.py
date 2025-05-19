@@ -13,7 +13,7 @@ if __name__ == '__main__':
     #
     # cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, R=4000000, s_to=1093, s_landing=975, h_cr=8535,
     #                  V_cr=150, A=10.1, airfoil_name_root='64318', airfoil_name_tip='64412', N_engines=4, root_le=0.4,
-    #                  horizontal_airfoil='0018', vertical_airfoil='0018', cl_cr=0.4, AoA=2, mach=0.49, Nz=3)
+    #                  horizontal_airfoil='0018', vertical_airfoil='0018', AoA=2, mach=0.49, Nz=3)
     #
     # display(cargo)
 

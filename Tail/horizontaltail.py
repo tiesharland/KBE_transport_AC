@@ -38,7 +38,7 @@ class HorizontalTail(GeomBase):
 
     @Attribute
     def volume_coefficient_h(self):
-        return 1
+        return 0.859
 
     @Attribute
     def X_h(self):

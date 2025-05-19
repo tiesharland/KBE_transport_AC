@@ -4,24 +4,27 @@ from parapy.core import *
 from parapy.geom import *
 from Wing.Sizing import calculate_optimal_point
 
-
+#This is the class engines used to determine and visualise the turboprop engines that are instantiated
+#The power is a result of the .Sizing tool created which determines the W/P value
+#The weight is the MTOW and the power attained is in Watts, from this power the initial sizing of the engines is done
 class Engines(GeomBase):
-    name = Input()
-    tow = Input()
-    s_to = Input()
-    s_landing = Input()
-    h_cr = Input()
-    V_cr = Input()
-    A = Input()
-    N_engines = Input()
-    span = Input()
-    Nz = Input()
+    tow = Input() #Maximum take-off weight (MTOW) determined from class II weight estimation [N]
+    s_to = Input() #Take-off distance [m]
+    s_landing = Input() #Landing distance [m]
+    h_cr = Input() #Cruise altitude [m]
+    V_cr = Input() #Cruise velocity [m/s]
+    A = Input() #Aspect ratio [-]
+    N_engines = Input() #Number of engines [-]
+    span = Input() #Span of the wing [m]
+    Nz = Input() #Ultimate load factor [-]
 
+    #This evaluates the .Sizing tool calculate_optimal_point and extracts the W/P value, which in combination with the MTOW gives the power
     @Attribute
     def power_to(self):
         ws, wp = calculate_optimal_point(self.s_to, self.s_landing, self.h_cr, self.V_cr, self.A, plotting=False)
         return self.tow * 9.81 / wp
 
+    #Engine diameter
     @Attribute
     def diameter_eng(self):
         return 0.2 * (self.power_to/1000*self.N_engines)**(0.18)
@@ -41,21 +44,23 @@ class Engines(GeomBase):
     @Attribute
     def w_ee(self):
         return 1.1 * self.diameter_eng
-
+    #Mass of a single engine, [kg], based on the Allison T56 turboprop as used by the C130
     @Attribute
     def single_mass(self):
         return 1000
-
+    #Total engine mass [kg]
     @Attribute
     def engines_mass(self):
         return self.N_engines * self.single_mass
-
+   
+    #Center of gravity, in the x-direction (from nose to tail), of the engine system
     @Attribute
     def cg(self):
         engine_parts = self.engines
         cg_x = sum(engine.cog[0] * self.single_mass for engine in engine_parts) / self.engines_mass
         return cg_x
 
+    #The position of the engines along the span of the wing, this is a function of the number of engines
     @Attribute
     def pos_engine(self):
         if self.N_engines == 2:
@@ -64,6 +69,7 @@ class Engines(GeomBase):
             pos = np.array([0.4 * self.span / 2, 0.7 * self.span / 2, -0.4 * self.span / 2, -0.7 * self.span / 2])
         return pos
 
+    #Class II weight estimation of the engine system
     @Attribute
     def class2_weight(self):
         Kng = 1     # Non-pylon-mounted nacelle
@@ -74,21 +80,22 @@ class Engines(GeomBase):
                            * W_ec ** 0.611 * self.N_engines ** 0.984 * (self.engines.first.area / .3048**2) ** 0.224)
                 + self.N_engines * self.single_mass)
 
+    #This generates the box shapes of the engines
     @Part
     def engines(self):
         return Box(
-            length=self.l_ee,
-            width=self.w_ee,
-            height=self.h_ee,
-            position=self.position.translate(y=self.pos_engine[child.index]).rotate(z=np.deg2rad(270)),
-            quantify=self.N_engines,
-            color=[128, 128, 128]
+            length=self.l_ee, #length
+            width=self.w_ee, #width
+            height=self.h_ee, #height
+            position=self.position.translate(y=self.pos_engine[child.index], z=self.h_ee / 2).rotate(z=np.deg2rad(270)), #position
+            quantify=self.N_engines, #Number of engines
+            color=[128, 128, 128], centered=True #Color of the engine blocks
         )
 
 
 if __name__ == '__main__':
     from parapy.gui import display
-    engines = Engines(mtow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, N_engines=4, span=20)
+    engines = Engines(tow=70307*9.81, s_to=1093, s_landing=762, h_cr=8535, V_cr=150, A=10.1, N_engines=4, span=20)
     display(engines)
 
 
