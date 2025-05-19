@@ -92,6 +92,14 @@ class Engines(GeomBase):
             color=[128, 128, 128], centered=True #Color of the engine blocks
         )
 
+    @Part
+    def propellers(self):
+        return Circle(
+            radius=self.diam_prop / 2,
+            position=self.position.translate(x=self.l_ee / 2 + 0.1,y=self.pos_engine[child.index], z=self.h_ee / 2).rotate(y=np.deg2rad(270)),
+            color='black',
+            quantify=self.N_engines)
+
 
 if __name__ == '__main__':
     from parapy.gui import display
