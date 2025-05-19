@@ -79,7 +79,8 @@ class Aircraft(GeomBase):
     @Attribute
     def class1(self):
         # This instantiates the Class I weight estimation.
-        return ClassI(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons, R=self.R)
+        return ClassI(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons,
+                      R=self.R, eff_p=self.eff_p)#, ld_cr=self.AVL.l_over_d)
 
     @Attribute
     def oew(self):
@@ -219,7 +220,7 @@ class Aircraft(GeomBase):
     def V_h(self):
         return ((self.horizontailtail.surface_h * (self.horizontaltail.X_h - self.cg_total))
                 / (self.wing.surface * self.wing.MAC))
-    
+
     @Attribute
     def neutralpoint(self):
         # Determination of the neutral point along the length of the fuselage.
@@ -244,9 +245,43 @@ class Aircraft(GeomBase):
         ws = wb.active
         ws.title = "Output design parameters"
         ws.append(["Parameter", "Value", "Unit"])
-        ws.append(["TOW", self.class1.wto, 'kg'])
-        ws.append(["OEW", self.oew, 'kg'])
-        ws.append(["Wingspan", self.wing.span, 'm'])
+        ws.append(["Number of 463L master pallet crates", self.num_crates, "-"])
+        ws.append(["Number of Humvee 1151 vehicles", self.num_vehicles, "-"])
+        ws.append(["Number of airborne personnel", self.num_persons, "-"])
+        ws.append(["Range", self.R, "m"])
+        ws.append(["Take-off distance", self.s_to, "m"])
+        ws.append(["Landing distance", self.s_landing, "m"])
+        ws.append(["Cruise altitude", self.h_cr, "m"])
+        ws.append(["Cruise velocity", self.V_cr, "m/s"])
+        ws.append(["Wing aspect ratio", self.A, "-"])
+        ws.append(["Wing root airfoil", self.airfoil_name_root, "-"])
+        ws.append(["Wing tip airfoil", self.airfoil_name_tip, "-"])
+        ws.append(["Number of engines", self.N_engines, "-"])
+        ws.append(["Wing position", self.root_le, "x/length_fuselage"])
+        ws.append(["Horizontal tail thickness ratio", self.horizontal_airfoil, "t/c_h_root"])
+        ws.append(["Vertical tail thickness ratio", self.vertical_airfoil, "t/c_v_root"])
+        ws.append(["Cruise angle of attack", self.AoA, "deg"])
+        ws.append(["Ultimate design load factor", self.Nz, "-"])
+        ws.append(["Number of fuel tanks", self.Nt, "-"])
+        ws.append(["Design propulsive efficiency", self.eff_p, "-"])
+        ws.append([])
+        ws.append(["Class I weight estimation","",""])
+        ws.append(["Operative Empty Weight (OEW)", self.oew, 'kg'])
+        ws.append(["Take-Off Weight (TOW)", self.tow, 'kg'])
+        ws.append(["Fuel weight (Wf)", self.class1.wfuel, 'kg'])
+        ws.append([])
+        ws.append(["Class II weight estimation", "", ""])
+        ws.append(["Wing weight", self.wing.class2_weight, "kg"])
+        ws.append(["Fuselage weight", self.fuselage.class2_weight, "kg"])
+        ws.append(["Engine weight", self.propulsion.class2_weight, "kg"])
+        ws.append(["Horizontal tail weight", self.horizontaltail.class2_weight, "kg"])
+        ws.append(["Vertical tail weight", self.verticaltail.class2_weight, "kg"])
+        ws.append(["Fuel tank weight", self.wing.fueltank.class2_weight, "kg"])
+        ws.append([])
+        ws.append(["Longitudinal Static Stability", "", ""])
+        ws.append(["Tailless center of gravity", self.cg_tail_off, "m"])
+        ws.append(["Total center of gravity", self.cg_total, "m"])
+        ws.append(["Stability margin", self.stability_margin, "m"])
         wb.save(excel_path)
         print(f"Output file created in {excel_path}")
 

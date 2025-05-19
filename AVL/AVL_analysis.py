@@ -14,8 +14,7 @@ class AVL(GeomBase):
     span = Input()
     MAC = Input()
     mach = Input()
-    AoA = Input ()
-
+    AoA = Input()
 
     @Part
     def root_airfoil(self):
@@ -81,7 +80,7 @@ class AVL(GeomBase):
     @Attribute
     def l_over_d(self):
         return {result['Name']: result['Totals']['CLtot'] / result['Totals']['CDtot']
-                for case_name, result in self.avl_analysis.results.items()}
+                for case_name, result in self.avl_analysis.results.items()}['fixed_aoa']
 
 
 if __name__ == '__main__':

@@ -8,11 +8,11 @@ class ClassI(Base):
     num_vehicles = Input()
     num_persons = Input()
     R = Input()
+    eff_p = Input()
+    ld_cr = Input(14)
+    cp = Input(.6 * 1.68965941e-7)
     a = Input(0.5482)
     b = Input(486.68)
-    ld_cr = Input(14)
-    eff_p = Input(0.82)
-    cp = Input(.6 * 1.68965941e-7)
     W_OE = Input(None)
 
     @Attribute
