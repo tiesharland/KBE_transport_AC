@@ -1,6 +1,7 @@
 from parapy.core import *
 from parapy.geom import *
 from Wing.tankprofile import TankProfile
+from Warnings_Errors.gen_warning import generate_warning
 
 
 class FuelTank(GeomBase):
@@ -11,8 +12,9 @@ class FuelTank(GeomBase):
     tip_le_offset = Input()
     span = Input()
     wall_thickness = Input()
-    fueltank_mass = Input()
+    fuel_weight = Input()
     Nt = Input()
+    fuel_density = Input(800) # kg/m^3
 
     @Attribute
     def scaled_factor_x(self):
@@ -28,7 +30,7 @@ class FuelTank(GeomBase):
 
     @Attribute
     def Vi(self):
-        return self.outer_surf.volume
+        return self.outer_tank.volume
 
     @Attribute
     def Vp(self):
@@ -41,6 +43,19 @@ class FuelTank(GeomBase):
     @Attribute
     def class2_weight(self):
         return 0.45359 * (2.405 * (self.Vt * 264.172) ** 0.606 / (1 + self.Vi/self.Vt) * (1 + self.Vp/self.Vt) * self.Nt ** 0.5)
+
+    @Attribute
+    def fuel_volume(self):
+        v = self.fuel_weight / self.fuel_density
+        if v >= self.Vt:
+            head = "Fuel weight too large:"
+            msg = (f"The amount of fuel required ({v:.2f} m^3, or {self.fuel_weight:.2f} kg) for the given range is more than "
+                   f"can be carried in the tanks ({self.Vt:.2f} m^3). Decrease the range and try again.")
+            generate_warning(head, msg)
+        return v
+
+    def post_init_v(self):
+        _ = self.fuel_volume
 
     @Part
     def root_profile(self):
@@ -96,7 +111,7 @@ class FuelTank(GeomBase):
     #     return Vector(v.x, v.y + self.wall_thickness, v.z)
 
     @Part
-    def outer_surf(self):
+    def outer_tank(self):
         return RuledSolid(profiles=[self.tip_tank_left, self.root_tank, self.tip_tank_right],
                           transparency=0.4, position=self.position, color=[128, 128, 128])
 
@@ -110,7 +125,8 @@ class FuelTank(GeomBase):
     #     return SubtractedSolid(shape_in=self.outer_surf, tool=self.inner_surf, position=self.position)
     @Attribute
     def cg_x(self):
-        return self.outer_surf.cog[0]
+        v_f = self.fuel_volume
+        return self.outer_tank.cog[0]
 
 if __name__ == '__main__':
     from parapy.gui import display

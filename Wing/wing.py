@@ -2,7 +2,7 @@ from math import sqrt, radians, tan, pi
 from parapy.core import *
 from parapy.geom import *
 from Wing.airfoil import Airfoil
-from Wing.Sizing import calculate_optimal_point
+from Wing.sizing import Sizing
 from Wing.fueltank import FuelTank
 
 class Wing(GeomBase):
@@ -18,11 +18,15 @@ class Wing(GeomBase):
     Nz = Input()
     Scsw = Input(2*55 * .3048 ** 2)
     Nt = Input()
+    fuel_weight = Input()
+    Mff = Input()
+    eff_p = Input()
 
 
     @Attribute
     def surface(self):
-        ws, wp = calculate_optimal_point(self.s_to, self.s_landing, self.h_cr, self.V_cr, self.A, plotting=False)
+        ws, wp = Sizing(s_to=self.s_to, s_landing=self.s_landing, h_cr=self.h_cr, V_cr=self.V_cr, A=self.A,
+                        Mff=self.Mff, eff_p=self.eff_p).design_point
         return self.tow * 9.81 / ws
 
     @Attribute
@@ -104,18 +108,18 @@ class Wing(GeomBase):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=(self.root_chord-self.tip_chord)/4, y=self.span/-2))
 
-
     @Part
     def wing(self):
         return RuledSolid(
             profiles=[self.tip_mirrored.profile, self.root_airfoil.profile, self.tip_airfoil.profile],
             position=self.position,color=[107, 142, 35]
         )
+
     @Part
     def fueltank(self):
         return FuelTank(airfoil_name_root=self.airfoil_name_root, airfoil_name_tip=self.airfoil_name_tip, span=self.span,
                         root_chord=self.root_chord, tip_chord=self.tip_chord, tip_le_offset=self.tip_le_offset,
-                        wall_thickness=0.02, position=self.position, Nt=self.Nt)
+                        wall_thickness=0.02, position=self.position, Nt=self.Nt, fuel_weight=self.fuel_weight)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ from math import sqrt, radians, tan, pi
 import numpy as np
 from parapy.core import *
 from parapy.geom import *
-from Wing.Sizing import calculate_optimal_point
+from Wing.sizing import Sizing
 
 #This is the class engines used to determine and visualise the turboprop engines that are instantiated
 #The power is a result of the .Sizing tool created which determines the W/P value
@@ -17,11 +17,14 @@ class Engines(GeomBase):
     N_engines = Input() #Number of engines [-]
     span = Input() #Span of the wing [m]
     Nz = Input() #Ultimate load factor [-]
+    Mff = Input()
+    eff_p = Input()
 
     #This evaluates the .Sizing tool calculate_optimal_point and extracts the W/P value, which in combination with the MTOW gives the power
     @Attribute
     def power_to(self):
-        ws, wp = calculate_optimal_point(self.s_to, self.s_landing, self.h_cr, self.V_cr, self.A, plotting=False)
+        ws, wp = Sizing(s_to=self.s_to, s_landing=self.s_landing, h_cr=self.h_cr, V_cr=self.V_cr, A=self.A,
+                        Mff=self.Mff, eff_p=self.eff_p).design_point
         return self.tow * 9.81 / wp
 
     #Engine diameter
@@ -29,25 +32,31 @@ class Engines(GeomBase):
     def diameter_eng(self):
         return 0.2 * (self.power_to/1000*self.N_engines)**(0.18)
 
+    #Length of the engine envelope including engine cowling
     @Attribute
     def l_ee(self):
         return 0.1 * (self.power_to/ 1000 * self.N_engines)**(0.4)
 
+    #Propeller diameter
     @Attribute
     def diam_prop(self):
         return 0.55 * (self.power_to/1000 * self.N_engines)**(1/4)
 
+    #Height of the engine envelope including engine cowling
     @Attribute
     def h_ee(self):
         return 1.5 * self.diameter_eng
 
+    #Width of the engine envelope including engine cowling
     @Attribute
     def w_ee(self):
         return 1.1 * self.diameter_eng
+
     #Mass of a single engine, [kg], based on the Allison T56 turboprop as used by the C130
     @Attribute
     def single_mass(self):
         return 1000
+
     #Total engine mass [kg]
     @Attribute
     def engines_mass(self):
@@ -78,7 +87,7 @@ class Engines(GeomBase):
         W_ec = 2.331 * (self.single_mass/.45359) ** 0.901 * Kp * Ktr
         return (0.45359 * (0.6724 * Kng * (self.l_ee/.3048) ** 0.1 * (self.w_ee/.3048) ** 0.294 * self.Nz ** 0.119
                            * W_ec ** 0.611 * self.N_engines ** 0.984 * (self.engines.first.area / .3048**2) ** 0.224)
-                + self.N_engines * self.single_mass)
+                + self.engines_mass)
 
     #This generates the box shapes of the engines
     @Part
@@ -87,18 +96,19 @@ class Engines(GeomBase):
             length=self.l_ee, #length
             width=self.w_ee, #width
             height=self.h_ee, #height
-            position=self.position.translate(y=self.pos_engine[child.index], z=self.h_ee / 2).rotate(z=np.deg2rad(270)), #position
+            position=self.position.translate(x=self.l_ee/2 + 0.01, y=self.pos_engine[child.index], z=self.h_ee/2).rotate(z=np.deg2rad(270)), #position
             quantify=self.N_engines, #Number of engines
-            color=[128, 128, 128], centered=True #Color of the engine blocks
+            color=[128, 128, 128], #Color of the engine blocks
+            centered=True
         )
-
+    #Creates the propellers of the turboprop engines
     @Part
     def propellers(self):
         return Circle(
-            radius=self.diam_prop / 2,
-            position=self.position.translate(x=self.l_ee / 2 + 0.1,y=self.pos_engine[child.index], z=self.h_ee / 2).rotate(y=np.deg2rad(270)),
-            color='black',
-            quantify=self.N_engines)
+            radius=self.diam_prop / 2, #Propeller radius
+            position = self.position.translate(x=self.l_ee / 2, y=self.pos_engine[child.index], z=self.h_ee / 2).rotate(z=np.deg2rad(270)),  #position
+            color='black', #Color of propeller
+            quantify=self.N_engines) #Number of engines
 
 
 if __name__ == '__main__':

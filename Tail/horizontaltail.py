@@ -27,7 +27,6 @@ class HorizontalTail(GeomBase):
             hidden=True
         )
 
-
     @Attribute
     def A_h(self):
         return 4
@@ -55,6 +54,11 @@ class HorizontalTail(GeomBase):
     @Attribute
     def surface_h(self):
         return (self.S_wing * self.MAC * self.volume_coefficient_h) / (self.X_h - self.X_CG)
+
+    @Attribute
+    def V_h(self):
+        return ((self.surface_h * (self.X_h - self.cg_total))
+                / (self.wing.surface * self.wing.MAC))
 
     @Attribute
     def span_h(self):

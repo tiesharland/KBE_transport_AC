@@ -44,7 +44,7 @@ class Fuselage(GeomBase):
 
     @Attribute
     def fineness(self):
-        return self.length / self.radius / 2
+        return self.radius * 2 / self.length
 
     @Attribute
     def cg_x(self):

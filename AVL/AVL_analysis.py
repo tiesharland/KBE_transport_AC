@@ -2,7 +2,7 @@ from parapy.core import *
 from parapy.geom import *
 import kbeutils.avl as avl
 from Wing.wing import Wing
-from Wing.Sizing import calculate_optimal_point
+from Wing.sizing import Sizing
 from Wing.airfoil import Airfoil
 
 
@@ -28,9 +28,6 @@ class AVL(GeomBase):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
                        position=self.position.translate(x=self.tip_le_offset, y=self.span / 2))
 
-
-
-
     @Part
     def avl_section_root(self):
         return avl.Section(chord=self.root_chord,
@@ -42,7 +39,6 @@ class AVL(GeomBase):
         return avl.Section(chord=self.tip_chord,
                            airfoil=avl.NacaAirfoil(designation=self.airfoil_name_tip),
                            position=self.tip_airfoil.position)
-
 
     @Part
     def avl_surface(self):
@@ -81,10 +77,8 @@ class AVL(GeomBase):
     @Part
     def avl_analysis(self):
         return avl.Interface(configuration=self.avl_configuration,
-                             # note: AVL always expects a list of cases!
                              cases=[self.avl_case]
                              )
-
 
     @Attribute
     def l_over_d(self):

@@ -1,4 +1,4 @@
-from .Sizing import calculate_optimal_point
+from .sizing import Sizing
 from .fueltank import FuelTank
 from .airfoil import Airfoil
 from .wing import Wing
