@@ -9,9 +9,15 @@ from scipy.optimize import minimize_scalar
 
 class Cargo(GeomBase):
     name = Input("Cargo")
-    num_crates: int = Input(0)
-    num_persons: int = Input(0)
-    num_vehicles: int = Input(0)
+    num_crates: int = Input()
+    num_persons: int = Input()
+    num_vehicles: int = Input()
+    nose_fineness: float = Input()
+    tail_fineness: float = Input()
+
+    @Attribute
+    def min_length(self):
+        return 1
 
     @Part
     def crates(self):
@@ -28,7 +34,11 @@ class Cargo(GeomBase):
 
     @Attribute
     def length(self):
-        return self.vehicles.length + self.crates.length + self.personnel.length
+        l = self.vehicles.length + self.crates.length + self.personnel.length
+        if l == 0:
+            return self.min_length
+        else:
+            return l
 
     @Attribute
     def height(self):
@@ -62,7 +72,14 @@ class Cargo(GeomBase):
 
     @Attribute
     def outer_radius(self):
-        return (self.inner_radius * 1.045 * 2 + 0.084) / 2
+        r = (self.inner_radius * 1.045 * 2 + 0.084) / 2
+        l = r * (self.nose_fineness + self.tail_fineness) + self.length
+        if 2 * r > 0.4 * l:
+            return 0.4 * l / 2
+        elif 2 * r < 0.1 * l:
+            return 0.1 * l / 2
+        else:
+            return r
 
     @Attribute
     def offset(self):
@@ -76,10 +93,16 @@ class Cargo(GeomBase):
     @Attribute
     def mass(self):
         return self.personnel.mass + self.vehicles.mass + self.crates.mass
+
     @Attribute
     def cg_x(self):
-        x_cg = ((self.crates.mass * self.crates.cg) + (self.vehicles.mass * self.vehicles.cg) +(self.personnel.mass * self.personnel.cg)) / self.mass
-        return x_cg
+        if self.mass == 0:
+            return 0
+        else:
+            x_cg = ((self.crates.mass * self.crates.cg) + (self.vehicles.mass * self.vehicles.cg)
+                    + (self.personnel.mass * self.personnel.cg)) / self.mass
+            return x_cg
+
 
 if __name__ == "__main__":
     from parapy.gui import display

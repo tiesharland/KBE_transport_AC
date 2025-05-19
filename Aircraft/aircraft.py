@@ -147,7 +147,7 @@ class Aircraft(GeomBase):
     def cg_tail_off(self):
         return (((self.fuselage.cargo.cg_x * self.fuselage.cargo.mass) + (self.fuselage.cg_x * self.fuselage.class2_weight)
                 + (self.wing.cg_x * self.wing.class2_weight) + (self.wing.fueltank.cg_x * self.wing.fueltank.class2_weight))
-                /(self.fuselage.cargo.mass + self.fuselage.class2_weight + self.wing.class2_weight + self.wing.fueltank.class2_weight))
+                / (self.fuselage.cargo.mass + self.fuselage.class2_weight + self.wing.class2_weight + self.wing.fueltank.class2_weight))
 
     @Attribute
     def cg_total(self):
@@ -199,7 +199,6 @@ class Aircraft(GeomBase):
 
         wb.save(excel_path)
         print(f"Output file created in {excel_path}")
-
 
 
 if __name__ == '__main__':

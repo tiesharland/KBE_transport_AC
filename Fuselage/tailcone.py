@@ -9,12 +9,12 @@ class TailCone(GeomBase):
     divergence_angle = Input()
 
     @Attribute
-    def tail_length(self):
+    def length(self):
         return self.radius * 2 * self.tail_fineness
 
     @Attribute
     def end_offset(self):
-        return 0.5 * self.tail_length * np.tan(np.deg2rad(self.divergence_angle))
+        return 0.5 * self.length * np.tan(np.deg2rad(self.divergence_angle))
 
     @Attribute
     def end_radius(self):
@@ -23,7 +23,7 @@ class TailCone(GeomBase):
     @Part
     def profiles(self):
         return Circle(quantify=2, radius=[self.radius, self.end_radius][child.index],
-                      position=self.position.translate(x=child.index*self.tail_length,
+                      position=self.position.translate(x=child.index*self.length,
                                                        z=child.index*self.end_offset).rotate90('y'))
 
 

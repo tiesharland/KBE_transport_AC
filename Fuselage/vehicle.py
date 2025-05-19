@@ -27,9 +27,13 @@ class Vehicles(GeomBase):
 
         @Attribute
         def cg(self):
-            vehicle_parts = self.vehicles
-            x_cg = sum(vehicle.cog[0] * self.single_mass for vehicle in vehicle_parts) / self.mass
-            return x_cg
+            if self.num_vehicles == 0:
+                return 0
+            else:
+                vehicle_parts = self.vehicles
+                x_cg = sum(vehicle.cog[0] * self.single_mass for vehicle in vehicle_parts) / self.mass
+                return x_cg
+
         @Part
         def vehicles(self):
             return Box(
@@ -44,4 +48,4 @@ class Vehicles(GeomBase):
 if __name__ == '__main__':
     vehicle = Vehicles()
     from parapy.gui import display
-    display(Vehicle)
+    display(Vehicles)

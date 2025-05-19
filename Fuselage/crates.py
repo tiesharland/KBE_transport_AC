@@ -28,9 +28,12 @@ class Crates(GeomBase):
 
     @Attribute
     def cg(self):
-        crate_parts = self.crates
-        x_cg = sum(crate.cog[0] * self.single_mass for crate in crate_parts) / self.mass
-        return x_cg
+        if self.num_crates == 0:
+            return 0
+        else:
+            crate_parts = self.crates
+            x_cg = sum(crate.cog[0] * self.single_mass for crate in crate_parts) / self.mass
+            return x_cg
 
     @Part
     def crates(self):

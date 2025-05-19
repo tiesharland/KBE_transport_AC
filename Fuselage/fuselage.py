@@ -20,11 +20,11 @@ class Fuselage(GeomBase):
 
     @Attribute
     def nose_length(self):
-        return self.nose_fineness * self.radius * 2
+        return self.nose_fineness * self.cargo.outer_radius * 2
 
     @Attribute
     def tail_length(self):
-        return self.tail_fineness * self.radius * 2
+        return self.tail_fineness * self.cargo.outer_radius * 2
 
     @Attribute
     def radius(self):
@@ -36,21 +36,15 @@ class Fuselage(GeomBase):
 
     @Attribute
     def length(self):
-        return self.cargo.length + self.nose_length + self.tail_length
+        return self.cargo.length + self.nosecone.length + self.tailcone.length
 
     @Attribute
     def tail_start(self):
-        return self.cargo.length + self.nose_length
+        return self.cargo.length + self.nosecone.length
 
     @Attribute
     def fineness(self):
         return self.length / self.radius / 2
-
-
-
-    # @fineness.validator
-    # def fineness_validator(self, value):
-    #     if value >
 
     @Attribute
     def cg_x(self):
@@ -68,7 +62,8 @@ class Fuselage(GeomBase):
     @Part
     def cargo(self):
         return Cargo(pass_down='num_crates, num_vehicles, num_persons',
-                     position=self.position.translate(x=self.nosecone.length))
+                     position=self.position.translate(x=self.nosecone.length), nose_fineness=self.nose_fineness,
+                     tail_fineness=self.tail_fineness)
 
     @Part
     def nosecone(self):
@@ -82,14 +77,19 @@ class Fuselage(GeomBase):
     @Attribute
     def profiles(self):
         n = [p for p in self.nosecone.profiles]
-        c = [p for p in self.cargo.profiles]
         t = [p for p in self.tailcone.profiles]
+        # if self.radius != self.cargo.outer_radius:
+        #     profs = Circle(radius=self.radius, quantify=2,
+        #                position=self.position.translate(x=(self.length*child.index)
+        #                                                   + self.nosecone.length).rotate90('y'))
+        #     c = [p for p in profs]
+        # else:
+        c = [p for p in self.cargo.profiles]
         return n + c + t
 
     @Part
     def fuselage(self):
         return RuledSolid(profiles=self.profiles,color=[107, 142, 35], mesh_deflection=0.0001)
-
 
 
 if __name__ == "__main__":
