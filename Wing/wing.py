@@ -2,7 +2,6 @@ from math import sqrt, radians, tan, pi
 from parapy.core import *
 from parapy.geom import *
 from Wing.airfoil import Airfoil
-from Wing.sizing import Sizing
 from Wing.fueltank import FuelTank
 
 class Wing(GeomBase):
@@ -19,15 +18,12 @@ class Wing(GeomBase):
     Scsw = Input(2*55 * .3048 ** 2)
     Nt = Input()
     fuel_weight = Input()
-    Mff = Input()
-    eff_p = Input()
+    ws = Input()
 
 
     @Attribute
     def surface(self):
-        ws, wp = Sizing(s_to=self.s_to, s_landing=self.s_landing, h_cr=self.h_cr, V_cr=self.V_cr, A=self.A,
-                        Mff=self.Mff, eff_p=self.eff_p).design_point
-        return self.tow * 9.81 / ws
+        return self.tow * 9.81 / self.ws
 
     @Attribute
     def taper_ratio(self):

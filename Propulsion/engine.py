@@ -2,7 +2,6 @@ from math import sqrt, radians, tan, pi
 import numpy as np
 from parapy.core import *
 from parapy.geom import *
-from Wing.sizing import Sizing
 
 #This is the class engines used to determine and visualise the turboprop engines that are instantiated
 #The power is a result of the .Sizing tool created which determines the W/P value
@@ -17,15 +16,12 @@ class Engines(GeomBase):
     N_engines = Input() #Number of engines [-]
     span = Input() #Span of the wing [m]
     Nz = Input() #Ultimate load factor [-]
-    Mff = Input()
-    eff_p = Input()
+    wp = Input()
 
     #This evaluates the .Sizing tool calculate_optimal_point and extracts the W/P value, which in combination with the MTOW gives the power
     @Attribute
     def power_to(self):
-        ws, wp = Sizing(s_to=self.s_to, s_landing=self.s_landing, h_cr=self.h_cr, V_cr=self.V_cr, A=self.A,
-                        Mff=self.Mff, eff_p=self.eff_p).design_point
-        return self.tow * 9.81 / wp
+        return self.tow * 9.81 / self.wp
 
     #Engine diameter
     @Attribute

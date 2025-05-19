@@ -1,8 +1,6 @@
 from parapy.core import *
 from parapy.geom import *
 import kbeutils.avl as avl
-from Wing.wing import Wing
-from Wing.sizing import Sizing
 from Wing.airfoil import Airfoil
 
 

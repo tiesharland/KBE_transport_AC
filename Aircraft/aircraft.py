@@ -1,6 +1,13 @@
 from parapy.core import *
 from parapy.geom import *
-from math import *
+import numpy as np
+from parapy.exchange.step import STEPWriter
+import matplotlib.pyplot as plt
+import os
+import openpyxl
+import wx
+
+from Sizing.sizing import Sizing
 from Fuselage.fuselage import Fuselage
 from Propulsion.engine import Engines
 from Wing.wing import Wing
@@ -9,19 +16,13 @@ from Tail.verticaltail import VerticalTail
 from Weight_estimation.classI import ClassI
 from Weight_estimation.classII import ClassII
 from AVL.AVL_analysis import AVL
-import numpy as np
-from parapy.exchange.step import STEPWriter
 from Warnings_Errors.gen_warning import generate_warning
-import openpyxl
-import matplotlib
-matplotlib.use('TkAgg')  # or 'Qt5Agg' if you have it
-import matplotlib.pyplot as plt
-import os
+
+
 DIR = str(os.getcwd())
-
-
 if not os.path.exists(DIR):
     os.makedirs(DIR)
+
 
 class Aircraft(GeomBase):
     num_crates = Input()            # Number of 463L master pallets (is being called a crate) [-].
@@ -124,6 +125,11 @@ class Aircraft(GeomBase):
     #                        Vi=self.wing.fueltank.outer_surf.volume, Vp=0, Vt=self.wing.fueltank.outer_surf.volume, Nt=2)
 
     @Part
+    def sizing(self):
+        return Sizing(s_to=self.s_to, s_landing=self.s_landing, h_cr=self.h_cr, V_cr=self.V_cr, A=self.A,
+                      Mff=self.class1.Mff, eff_p=self.eff_p)
+
+    @Part
     def fuselage(self):
         # Instantiation of the fuselage class.
         return Fuselage(pass_down='num_crates, num_vehicles, num_persons', Kws_ratio=self.wing.Kws_ratio,
@@ -134,13 +140,13 @@ class Aircraft(GeomBase):
         # Instantiation of the wing class, including the fuel tanks present in the wing.
         return Wing(pass_down='s_to, s_landing, h_cr, V_cr, A, airfoil_name_root, airfoil_name_tip', tow=self.class1.wto,
                     position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius), Nz=self.Nz, Nt=self.Nt,
-                    fuel_weight=self.class1.wfuel, Mff=self.class1.Mff, eff_p=self.eff_p)
+                    fuel_weight=self.class1.wfuel, ws=self.sizing.ws_opt)
 
     @Part
     def propulsion(self):
         # Instantiation of the propulsion system, hence the turboprop engines.
         return Engines(pass_down='s_to, s_landing, h_cr, V_cr, A, N_engines, Nz', span=self.wing.span,
-                       tow=self.class1.wto, Mff=self.class1.Mff, eff_p=self.eff_p,
+                       tow=self.class1.wto, wp=self.sizing.wp_opt,
                        position=self.wing.position.translate(x=self.propulsion.l_ee/2,
                                                              z=-self.propulsion.h_ee).rotate(z=np.deg2rad(180)))
 
@@ -166,7 +172,7 @@ class Aircraft(GeomBase):
         return AVL(pass_down='AoA', airfoil_name_root=self.wing.airfoil_name_root,
                    root_chord=self.wing.root_chord, airfoil_name_tip=self.wing.airfoil_name_tip,
                    tip_chord=self.wing.tip_chord, tip_le_offset=self.wing.tip_le_offset,
-                   surface=self.wing.surface, span=self.wing.span, MAC=self.wing.MAC, mach=self.wing.Sizing.Mach,
+                   surface=self.wing.surface, span=self.wing.span, MAC=self.wing.MAC, mach=self.sizing.Mach,
                    position=self.position.translate(x=self.x_root_wing, z=self.fuselage.radius))
 
     @Attribute
@@ -194,12 +200,30 @@ class Aircraft(GeomBase):
                           nodes=[self.wing.wing, self.fuselage.fuselage,
                                  * [self.propulsion.engines[i] for i in range(self.N_engines)],
                                  self.verticaltail.vertical_tail, self.horizontaltail.horizontal_tail])
-
+    @Attribute
+    def a_t(self):
+        # The lift curve slope of the commonly used NACA 0012 horizontal tail airfoil [1/rad].
+        return 5.7
 
     @Attribute
+    def a(self):
+        # The lift curve slope of the NACA 64A318 airfoil used at the root of the main wing on the Lockheed C-130 Hercules.
+        return 6
+
+    @Attribute
+    def downwash(self):
+        # The downwash angle (d_epsilon/d_alpha) as defined by the reference paper on longitudinal static stability from the TU Delft.
+        return 0.10
+
+    @Attribute
+    def V_h(self):
+        return ((self.horizontailtail.surface_h * (self.horizontaltail.X_h - self.cg_total))
+                / (self.wing.surface * self.wing.MAC))
+    
+    @Attribute
     def neutralpoint(self):
-    #Requires accurate estimation of dcl/dalpha_ tail & dcl/dalpha_wing and depsilon/dalpha
-        return (1 / 2 * pi) * self.horizontaltail.V_h * (1 - 0.30) * self.wing.MAC
+        # Determination of the neutral point along the length of the fuselage.
+        return (self.a_t/self.a) * self.V_h * (1 - self.downwash) * self.wing.MAC
 
     @Attribute
     def stability_margin(self):
@@ -226,25 +250,43 @@ class Aircraft(GeomBase):
         wb.save(excel_path)
         print(f"Output file created in {excel_path}")
 
-    # @action(label="Plot loading diagram", button_label="Click here to plot W/S - W/P diagram used in wing sizing")
-    # #This allows whether the user wants to visualise the generated W/S vs W/P plot or not
-    # def plot_loading_diagram(self):
-    #     plt.plot(x_to, y_to, label='Take-off Constraint', color='blue')
-    #     plt.axvline(ws_stall_clean, color='red', linestyle='--', label=f'Stall (CLmax={CL_max[0]})')
-    #     plt.axvline(ws_stall_TO, color='orange', linestyle='--', label=f'Stall (CLmax={CL_max[1]})')
-    #     plt.axvline(ws_stall_landing, color='purple', linestyle='--', label=f'Stall (CLmax={CL_max[2]})')
-    #     plt.axvline(ws_landing, color='green', linestyle='--', label='Landing Constraint')
-    #     plt.plot(x_cr, y_cr, label='Cruise Constraint', color='red')
-    #     plt.scatter(vertical_limit, y_opt, marker='*', s=200, color='black')
-    #     plt.xlabel('W/S')
-    #     plt.ylabel('W/P')
-    #     plt.title('Constraint Diagram')
-    #     plt.ylim(0, 0.4)
-    #     plt.grid(True)
-    #     plt.legend()
-    #     plt.show()
-    #     print(f"Optimal W/S ={vertical_limit}")
-    #     print(f"Optimal W/P ={y_opt}")
+    @action(label="Plot loading diagram", button_label="Click here to plot W/S - W/P diagram used in wing sizing")
+    #This allows whether the user wants to visualise the generated W/S vs W/P plot or not
+    def plot_loading_diagram(self):
+        frame = wx.Frame(None, wx.ID_ANY, "W/S - W/P diagram", size=(800, 600))
+        panel = wx.Panel(frame)
+
+        fig, ax = plt.subplots(1, 1)
+        ax.plot(self.sizing.take_off[0], self.sizing.take_off[1], label='Take-off Constraint', color='blue')
+        ax.axvline(self.sizing.stall_speed[0], color='red', linestyle='--', label=f'Stall (CLmax={self.sizing.CL_max[0]})')
+        ax.axvline(self.sizing.stall_speed[1], color='orange', linestyle='--', label=f'Stall (CLmax={self.sizing.CL_max[1]})')
+        ax.axvline(self.sizing.stall_speed[2], color='purple', linestyle='--', label=f'Stall (CLmax={self.sizing.CL_max[2]})')
+        ax.axvline(self.sizing.landing, color='green', linestyle='--', label='Landing Constraint')
+        ax.plot(self.sizing.cruise[0], self.sizing.cruise[1], label='Cruise Constraint', color='red')
+        ax.scatter(self.sizing.ws_opt, self.sizing.wp_opt, marker='*', s=200, color='black')
+        ax.set_xlabel('W/S')
+        ax.set_ylabel('W/P')
+        ax.set_title('Constraint Diagram')
+        ax.set_ylim(0, 0.4)
+        ax.grid(True)
+        ax.legend()
+
+        # print(f"Optimal W/S ={self.sizing.ws_opt}")
+        # print(f"Optimal W/P ={self.sizing.wp_opt}")
+
+        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+        canvas = FigureCanvas(panel, -1, fig)  # Directly attach to the existing panel
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(canvas, 1, wx.EXPAND)
+        panel.SetSizer(sizer)
+
+        # Properly destroy the frame when closing
+        frame.Bind(wx.EVT_CLOSE, self.on_close_frame)
+        frame.Show()
+
+    def on_close_frame(self, event):
+        frame = event.GetEventObject()
+        frame.Destroy()  # Properly destroy the frame and clean up
 
 
 if __name__ == '__main__':
