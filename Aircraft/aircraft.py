@@ -215,7 +215,7 @@ class Aircraft(GeomBase):
     @Attribute
     def neutralpoint(self):
         # Determination of the neutral point along the length of the fuselage.
-        return (self.a_t/self.a) * self.V_h * (1 - self.downwash) * self.wing.MAC
+        return (self.a_t / self.a) * self.V_h * (1 - self.downwash) * self.wing.MAC + self.x_root_wing
 
     @Attribute
     def stability_margin(self):
