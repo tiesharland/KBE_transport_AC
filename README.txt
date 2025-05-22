@@ -18,3 +18,16 @@ HOW TO USE
 6. To export the geometry as a STEP file, open the "aircraft" part, right click on "STEP" and click "write".
 7. Upon creating and export output files, the program will warn you if the created design is not stable. However, you
    will still be able to save the generated output files.
+
+-------------------------------------------------------
+
+Necessary Python packages
+-------------------------------------------------------
+numpy
+matplotlib
+pandas
+openpyxl
+wx
+kbeutils
+and of course:
+parapy
