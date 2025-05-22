@@ -106,6 +106,10 @@ class Aircraft(GeomBase):
     def range(self):
         return self.eff_p / 9.80655 / self.class1.cp * self.AVL.l_over_d * np.exp(self.tow / self.zfw * self.class1.ffs)
 
+    @Attribute
+    def endurance(self):
+        return self.range / self.V_cr / 3600
+
     # @Attribute
     # def class2(self):
     #     # This calls the Class II weight estimation class.

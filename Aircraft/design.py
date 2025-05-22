@@ -78,6 +78,7 @@ class Design(GeomBase):
         ws.append(["Number of Humvee 1151 vehicles", self.num_vehicles, "-"])
         ws.append(["Number of airborne personnel", self.num_persons, "-"])
         ws.append(["Range", self.aircraft.range, "m"])
+        ws.append(["Endurance", self.aircraft.endurance, "h"])
         ws.append(["Take-off distance", self.s_to, "m"])
         ws.append(["Landing distance", self.s_landing, "m"])
         ws.append(["Cruise altitude", self.h_cr, "m"])
