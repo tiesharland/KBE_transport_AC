@@ -53,13 +53,16 @@ class FuelTank(GeomBase):
         v = self.fuel_weight / self.fuel_density
         if v >= self.Vt:
             head = "Fuel weight too large:"
-            msg = (f"The amount of fuel required ({v:.2f} m^3, or {self.fuel_weight:.2f} kg) for the given range is more than "
-                   f"can be carried in the tanks ({self.Vt:.2f} m^3). Decrease the range and try again.")
+            msg = (f"The amount of fuel required ({v:.2f} m^3, or {self.fuel_weight:.2f} kg) for the given range is "
+                   f"more than can fit in the tanks ({self.Vt:.2f} m^3, or {self.max_fuel_weight:.2f} kg). "
+                   f"Fuel is overwritten to maximum tank capacity.")
             generate_warning(head, msg)
+            v = self.Vt
         return v
 
-    def post_init_v(self):
-        _ = self.fuel_volume
+    @Attribute
+    def real_fuel_weight(self):
+        return self.fuel_volume * self.fuel_density
 
     @Part
     def root_profile(self):

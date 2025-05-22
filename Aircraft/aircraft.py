@@ -100,7 +100,11 @@ class Aircraft(GeomBase):
 
     @Attribute
     def tow(self):
-        return self.zfw + self.class1.wfuel
+        return self.zfw + self.wing.fueltank.real_fuel_weight
+
+    @Attribute
+    def range(self):
+        return self.eff_p / 9.80655 / self.class1.cp * self.AVL.l_over_d * np.exp(self.tow / self.zfw * self.class1.ffs)
 
     # @Attribute
     # def class2(self):
@@ -223,7 +227,7 @@ class Aircraft(GeomBase):
         if margin <= 0:
             head = "Aircraft is not longitudinally stable:"
             msg = (f"The center of gravity (x={self.cg_total:.2f}) should be in front of the neutral "
-                   f"point(x={self.neutralpoint:.2f}). Move the wing more forward.")
+                   f"point(x={self.neutralpoint:.2f}). Reposition the wing.")
             generate_warning(head, msg)
         return margin
 

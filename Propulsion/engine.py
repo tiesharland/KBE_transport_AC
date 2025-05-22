@@ -97,14 +97,15 @@ class Engines(GeomBase):
             color=[128, 128, 128],
             centered=True
         )
-    @Part
-    def propellers(self):
-        # Creates the propellers of the turboprop engines.
-        return Circle(
-            radius=self.diam_prop / 2,
-            position = self.position.translate(x=self.l_ee/2, y=self.pos_engine[child.index], z=self.h_ee/2).rotate(z=np.deg2rad(270)),  #position
-            color='black',
-            quantify=self.N_engines)
+
+    # @Part
+    # def propellers(self):
+    #     # Creates the propellers of the turboprop engines.
+    #     return Circle(
+    #         radius=self.diam_prop / 2,
+    #         position = self.position.translate(x=self.l_ee/2, y=self.pos_engine[child.index], z=self.h_ee/2).rotate(z=np.deg2rad(270)),  #position
+    #         color='black',
+    #         quantify=self.N_engines)
 
 
 if __name__ == '__main__':

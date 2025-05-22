@@ -64,6 +64,10 @@ class ClassI(Base):
         return .992
 
     @Attribute
+    def ffs(self):
+        return self.ff1 * self.ff2 * self.ff3 * self.ff4 * self.ff7 * self.ff8
+
+    @Attribute
     def Mff(self):
         ff5 = 1 / np.exp(self.R / self.eff_p * self.cp * 9.80655 / self.ld_cr)
         return self.ff1 * self.ff2 * self.ff3 * self.ff4 * ff5 * self.ff7 * self.ff8
