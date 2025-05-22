@@ -40,15 +40,33 @@ class ClassI(Base):
         return 0.005
 
     @Attribute
+    def ff1(self):
+        return .990
+
+    @Attribute
+    def ff2(self):
+        return .990
+
+    @Attribute
+    def ff3(self):
+        return .995
+
+    @Attribute
+    def ff4(self):
+        return .980
+
+    @Attribute
+    def ff7(self):
+        return .990
+
+    @Attribute
+    def ff8(self):
+        return .992
+
+    @Attribute
     def Mff(self):
-        ff1 = .990
-        ff2 = .990
-        ff3 = .995
-        ff4 = .980
-        ff7 = .990
-        ff8 = .992
         ff5 = 1 / np.exp(self.R / self.eff_p * self.cp * 9.80655 / self.ld_cr)
-        return ff1 * ff2 * ff3 * ff4 * ff5 * ff7 * ff8
+        return self.ff1 * self.ff2 * self.ff3 * self.ff4 * ff5 * self.ff7 * self.ff8
 
     @Attribute
     def wto(self):
@@ -61,6 +79,37 @@ class ClassI(Base):
     @Attribute
     def wfuel(self):
         return (1 - self.Mff) * self.wto
+
+    # @Attribute
+    # def wfuel_max(self):
+    #     return
+
+    @Attribute
+    def Mff_max_range(self):
+        return (self.b + self.w_crew) / self.wto / 9.80655 + self.a + self.Mtfo
+
+    @Attribute
+    def max_range(self):
+        return (self.eff_p / self.cp / 9.80655 * self.ld_cr
+                * np.exp(self.ff1 * self.ff2 * self.ff3 * self.ff4 * self.ff7 * self.ff8 / self.Mff_max_range))
+
+    @Attribute
+    def wfuel_max(self):
+        return (1 - self.Mff_max_range) * self.wto
+
+    @Attribute
+    def Mff_range_max_fuel_pl(self):
+        return ((self.b + self.w_crew - 9.80655 * (self.oew + self.wfuel_max)) / self.wto / 9.80655
+                + self.a + self.Mtfo + 1)
+
+    @Attribute
+    def range_max_fuel_pl(self):
+        return (self.eff_p / self.cp / 9.80655 * self.ld_cr
+                * np.exp(self.ff1 * self.ff2 * self.ff3 * self.ff4 * self.ff7 * self.ff8 / self.Mff_range_max_fuel_pl))
+
+    @Attribute
+    def w_pl_max_fuel(self):
+        return self.wto - self.oew - self.wfuel_max
 
 
 if __name__ == '__main__':

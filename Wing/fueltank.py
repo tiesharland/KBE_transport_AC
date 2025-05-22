@@ -41,6 +41,10 @@ class FuelTank(GeomBase):
         return self.Vi + self.Vp
 
     @Attribute
+    def max_fuel_weight(self):
+        return self.Vt * self.fuel_density
+
+    @Attribute
     def class2_weight(self):
         return 0.45359 * (2.405 * (self.Vt * 264.172) ** 0.606 / (1 + self.Vi/self.Vt) * (1 + self.Vp/self.Vt) * self.Nt ** 0.5)
 

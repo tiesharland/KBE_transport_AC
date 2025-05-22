@@ -319,6 +319,42 @@ class Aircraft(GeomBase):
         frame.Bind(wx.EVT_CLOSE, self.on_close_frame)
         frame.Show()
 
+    @action(label="Plot payload-range diagram", button_label="Click here to plot PL-R diagram")
+    def plot_payloadrange_diagram(self):
+        w_pl_max_fuel = max(0, self.class1.wto - self.class1.oew - self.wing.fueltank.max_fuel_weight)
+        mff = ((self.class1.b + self.class1.w_crew + w_pl_max_fuel * 9.80655) / self.class1.wto / 9.80655
+               + self.class1.a + self.class1.Mtfo)
+        ffs = self.class1.ff1 * self.class1.ff2 * self.class1.ff3 * self.class1.ff4 * self.class1.ff7 * self.class1.ff8
+        range_pl_max_fuel = self.class1.eff_p / 9.80655 / self.class1.cp * self.class1.ld_cr * np.exp(ffs / mff)
+
+        A = [0, self.class1.w_payload / 9.80655]
+        B = [self.class1.R, self.class1.w_payload / 9.80655]
+        C = [range_pl_max_fuel, w_pl_max_fuel]
+        D = [self.class1.max_range, 0]
+
+        frame = wx.Frame(None, wx.ID_ANY, "W/S - W/P diagram", size=(800, 600))
+        panel = wx.Panel(frame)
+
+        fig, ax = plt.subplots(1, 1)
+        ax.plot([l[0] for l in (A, B, C, D)], [l[1] for l in (A, B, C, D)])
+        ax.grid(True)
+        ax.set_xlabel('Range [m]')
+        ax.set_ylabel('Payload weight [kg]')
+        ax.set_title('Payload-Range Diagram')
+        # ax.set_xlim(0, self.class1.max_range)
+        # ax.set_ylim(0, self.class1.w_payload / 9.80655)
+
+        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+        canvas = FigureCanvas(panel, -1, fig)  # Directly attach to the existing panel
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(canvas, 1, wx.EXPAND)
+        panel.SetSizer(sizer)
+
+        # Properly destroy the frame when closing
+        frame.Bind(wx.EVT_CLOSE, self.on_close_frame)
+        frame.Show()
+
+
     def on_close_frame(self, event):
         frame = event.GetEventObject()
         frame.Destroy()  # Properly destroy the frame and clean up

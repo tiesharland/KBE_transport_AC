@@ -9,6 +9,7 @@ if not os.path.exists(DIR):
 
 
 if __name__ == '__main__':
+
     from parapy.gui import display
     #
     # cargo = Aircraft(num_crates=1, num_vehicles=2, num_persons=9, R=4000000, s_to=1093, s_landing=975, h_cr=8535,
