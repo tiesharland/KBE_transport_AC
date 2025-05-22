@@ -67,9 +67,22 @@ class Design(GeomBase):
 
     @action(label="Create output file", button_label="Click here to create output Excel file")
     def output(self):
-        # Creation of the output .XLSX file, the required output parameters are appended to the file.
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        excel_path = os.path.join(os.path.dirname(base_dir), "aircraft_outputs.xlsx")
+        # Open a file save dialog for the user to specify output path
+        dialog = wx.FileDialog(
+            None,
+            message="Save Excel File As",
+            defaultFile="aircraft_outputs.xlsx",
+            wildcard="Excel files (*.xlsx)|*.xlsx",
+            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+        )
+
+        if dialog.ShowModal() == wx.ID_CANCEL:
+            print("Save cancelled by user.")
+            return  # Exit if user cancels
+
+        excel_path = dialog.GetPath()  # Full path the user chose
+        dialog.Destroy()
+
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Output design parameters"
@@ -132,8 +145,8 @@ class Design(GeomBase):
         ax.axvline(self.aircraft.sizing.landing, color='green', linestyle='--', label='Landing Constraint')
         ax.plot(self.aircraft.sizing.cruise[0], self.aircraft.sizing.cruise[1], label='Cruise Constraint', color='red')
         ax.scatter(self.aircraft.sizing.ws_opt, self.aircraft.sizing.wp_opt, marker='*', s=200, color='black')
-        ax.set_xlabel('W/S')
-        ax.set_ylabel('W/P')
+        ax.set_xlabel('W/S [N/m^2]')
+        ax.set_ylabel('W/P [N/W]')
         ax.set_title('Constraint Diagram')
         ax.set_ylim(0, 0.4)
         ax.grid(True)
@@ -142,10 +155,13 @@ class Design(GeomBase):
         # print(f"Optimal W/S ={self.sizing.ws_opt}")
         # print(f"Optimal W/P ={self.sizing.wp_opt}")
 
-        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-        canvas = FigureCanvas(panel, -1, fig)  # Directly attach to the existing panel
+        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
+        canvas = FigureCanvasWxAgg(panel, -1, fig)  # Directly attach to the existing panel
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(canvas, 1, wx.EXPAND)
+        toolbar = NavigationToolbar2WxAgg(canvas)
+        sizer.Add(toolbar, 0, wx.LEFT | wx.EXPAND)
+
         panel.SetSizer(sizer)
 
         # Properly destroy the frame when closing
@@ -177,10 +193,12 @@ class Design(GeomBase):
         # ax.set_xlim(0, self.class1.max_range)
         # ax.set_ylim(0, self.class1.w_payload / 9.80655)
 
-        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
-        canvas = FigureCanvas(panel, -1, fig)  # Directly attach to the existing panel
+        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg, NavigationToolbar2WxAgg
+        canvas = FigureCanvasWxAgg(panel, -1, fig)  # Directly attach to the existing panel
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(canvas, 1, wx.EXPAND)
+        toolbar = NavigationToolbar2WxAgg(canvas)
+        sizer.Add(toolbar, 0, wx.LEFT | wx.EXPAND)
         panel.SetSizer(sizer)
 
         # Properly destroy the frame when closing
