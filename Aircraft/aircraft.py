@@ -44,6 +44,8 @@ class Aircraft(GeomBase):
     Nz = Input(3)                   # Ultimate load factor [-].
     Nt = Input(2)                   # Number of fuel tanks [-].
     eff_p = Input(0.82)             # Propulsive efficiency
+    ld_cr = Input(14)               # Cruise L/D, based on empirics for initial design
+    W_OE = Input(None)              # Input OEW for iteration
 
     @Attribute
     def engine_attachment(self):
@@ -80,7 +82,7 @@ class Aircraft(GeomBase):
     def class1(self):
         # This instantiates the Class I weight estimation.
         return ClassI(num_crates=self.num_crates, num_vehicles=self.num_vehicles, num_persons=self.num_persons,
-                      R=self.R, eff_p=self.eff_p)#, ld_cr=self.AVL.l_over_d)
+                      R=self.R, eff_p=self.eff_p, ld_cr=self.ld_cr, W_OE=self.W_OE)#, ld_cr=self.AVL.l_over_d)
 
     @Attribute
     def oew(self):
@@ -89,8 +91,12 @@ class Aircraft(GeomBase):
                                              self.horizontaltail, self.verticaltail])
 
     @Attribute
+    def payload_weight(self):
+        return self.fuselage.cargo.mass
+
+    @Attribute
     def zfw(self):
-        return self.oew + self.fuselage.cargo.mass
+        return self.oew + self.payload_weight
 
     @Attribute
     def tow(self):
@@ -218,7 +224,7 @@ class Aircraft(GeomBase):
 
     @Attribute
     def V_h(self):
-        return ((self.horizontailtail.surface_h * (self.horizontaltail.X_h - self.cg_total))
+        return ((self.horizontaltail.surface_h * (self.horizontaltail.X_h - self.cg_total))
                 / (self.wing.surface * self.wing.MAC))
 
     @Attribute
@@ -354,6 +360,9 @@ class Aircraft(GeomBase):
         frame.Bind(wx.EVT_CLOSE, self.on_close_frame)
         frame.Show()
 
+    @action(label='Analyse stability margin', button_label="Click here to analyse stability margin")
+    def analyze_stability_margin(self):
+        stab_mar = self.stability_margin
 
     def on_close_frame(self, event):
         frame = event.GetEventObject()

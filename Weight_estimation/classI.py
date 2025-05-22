@@ -9,7 +9,7 @@ class ClassI(Base):
     num_persons = Input()
     R = Input()
     eff_p = Input()
-    ld_cr = Input(14)
+    ld_cr = Input()
     cp = Input(.6 * 1.68965941e-7)
     a = Input(0.5482)
     b = Input(486.68)
@@ -70,11 +70,17 @@ class ClassI(Base):
 
     @Attribute
     def wto(self):
-        return (self.b + self.w_crew + self.w_payload) / (self.Mff - self.a - self.Mtfo) / 9.80655
+        if self.W_OE:
+            return (self.W_OE + self.w_payload / 9.80655) / self.Mff
+        else:
+            return (self.b + self.w_crew + self.w_payload) / (self.Mff - self.a - self.Mtfo) / 9.80655
 
     @Attribute
     def oew(self):
-        return (self.a * self.wto * 9.80655 + self.b + self.wto * 9.80655 * self.Mtfo + self.w_crew) / 9.80655
+        if self.W_OE:
+            return self.W_OE
+        else:
+            return (self.a * self.wto * 9.80655 + self.b + self.wto * 9.80655 * self.Mtfo + self.w_crew) / 9.80655
 
     @Attribute
     def wfuel(self):
