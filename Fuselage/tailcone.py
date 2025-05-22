@@ -24,7 +24,8 @@ class TailCone(GeomBase):
     def profiles(self):
         return Circle(quantify=2, radius=[self.radius, self.end_radius][child.index],
                       position=self.position.translate(x=child.index*self.length,
-                                                       z=child.index*self.end_offset).rotate90('y'))
+                                                       z=child.index*self.end_offset).rotate90('y'),
+                      hidden=True)
 
 
 if __name__ == "__main__":

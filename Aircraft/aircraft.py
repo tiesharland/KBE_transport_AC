@@ -14,7 +14,6 @@ from Wing.wing import Wing
 from Tail.horizontaltail import HorizontalTail
 from Tail.verticaltail import VerticalTail
 from Weight_estimation.classI import ClassI
-from Weight_estimation.classII import ClassII
 from AVL.AVL_analysis import AVL
 from Warnings_Errors.gen_warning import generate_warning
 

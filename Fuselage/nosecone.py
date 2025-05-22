@@ -19,7 +19,7 @@ class NoseCone(GeomBase):
     def profiles(self):
         return Circle(quantify=len(self.sections),
                       position=self.position.translate(x=self.length*child.index/(len(self.sections)-1)).rotate90('y'),
-                      radius=self.radius*self.sections[child.index])
+                      radius=self.radius*self.sections[child.index], hidden=True)
 
     # @Part
     # def nosecone(self):

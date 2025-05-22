@@ -89,7 +89,7 @@ class VerticalTail(GeomBase):
     @Part
     def root_airfoil_v_untranslated(self):
         return ScaledCurve(curve_in=self.vertical_tail_airfoil, reference_point=self.position.point,
-                           factor=self.root_chord_v)
+                           factor=self.root_chord_v, hidden=True)
 
     @Attribute
     def cg_x(self):
@@ -108,26 +108,28 @@ class VerticalTail(GeomBase):
         return TransformedCurve(
             curve_in=self.root_airfoil_v_untranslated,
             from_position=self.position,
-            to_position=self.position.rotate90('x')
+            to_position=self.position.rotate90('x'),
+            hidden=True
         )
 
     @Part
     def tip_airfoil_v_untranslated(self):
         return ScaledCurve(curve_in=self.vertical_tail_airfoil, reference_point=self.position.point,
-                           factor=self.tip_chord_v)
+                           factor=self.tip_chord_v, hidden=True)
 
     @Part
     def tip_airfoil_v_translated(self):
         return TransformedCurve(
             curve_in=self.tip_airfoil_v_untranslated,
             from_position=self.position,
-            to_position=self.position.translate(x=self.tip_le_offset_v, z=self.span_v).rotate90('x')
+            to_position=self.position.translate(x=self.tip_le_offset_v, z=self.span_v).rotate90('x'),
+            hidden=True
         )
 
     @Part
     def vertical_tail(self):
         return LoftedSolid(
-            profiles=[self.root_airfoil_v_translated, self.tip_airfoil_v_translated],color=[107, 142, 35]
+            profiles=[self.root_airfoil_v_translated, self.tip_airfoil_v_translated], color=[107, 142, 35]
         )
 
 if __name__ == '__main__':

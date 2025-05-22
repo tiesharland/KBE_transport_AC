@@ -92,17 +92,20 @@ class Wing(GeomBase):
 
     @Part
     def root_airfoil(self):
-        return Airfoil(airfoil_name=self.airfoil_name_root, chord=self.root_chord, position=self.position)
+        return Airfoil(airfoil_name=self.airfoil_name_root, chord=self.root_chord, position=self.position,
+                       hidden=True)
 
     @Part
     def tip_airfoil(self):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
-                       position=self.position.translate(x=self.tip_le_offset, y=self.span/2))
+                       position=self.position.translate(x=self.tip_le_offset, y=self.span/2),
+                       hidden=True)
 
     @Part
     def tip_mirrored(self):
         return Airfoil(airfoil_name=self.airfoil_name_tip, chord=self.tip_chord,
-                       position=self.position.translate(x=(self.root_chord-self.tip_chord)/4, y=self.span/-2))
+                       position=self.position.translate(x=(self.root_chord-self.tip_chord)/4, y=self.span/-2),
+                       hidden=True)
 
     @Part
     def wing(self):

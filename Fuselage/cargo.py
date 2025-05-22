@@ -85,7 +85,7 @@ class Cargo(GeomBase):
     @Part
     def profiles(self):
         return Circle(position=self.position.translate(x=(self.length*child.index)).rotate90('y'),
-                      radius=self.outer_radius, quantify=2)
+                      radius=self.outer_radius, quantify=2, hidden=True)
 
     @Attribute
     def mass(self):

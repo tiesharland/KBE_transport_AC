@@ -12,7 +12,7 @@ class TankProfile(GeomBase):
         return DynamicType(
             type=(Naca5AirfoilCurve if len(self.airfoil_name) == 5 else Naca4AirfoilCurve),
             designation=self.airfoil_name,
-            hidden=False
+            hidden=True
         )
 
     @Attribute
@@ -29,7 +29,7 @@ class TankProfile(GeomBase):
 
     @Part
     def trim_curve(self):
-        return Polyline(points=[Point(x, y, z) for x, y, z in self.closed_trimmed_coords], close=True)
+        return Polyline(points=[Point(x, y, z) for x, y, z in self.closed_trimmed_coords], close=True, hidden=True)
 
     # @Attribute
     # def scalers(self):

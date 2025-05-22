@@ -55,8 +55,6 @@ class HorizontalTail(GeomBase):
     def surface_h(self):
         return (self.S_wing * self.MAC * self.volume_coefficient_h) / (self.X_h - self.X_CG)
 
-
-
     @Attribute
     def span_h(self):
         return sqrt(self.surface_h * self.A_h)
@@ -96,19 +94,21 @@ class HorizontalTail(GeomBase):
 
     @Part
     def root_airfoil_h(self):
-        return ScaledCurve(curve_in=self.horizontal_tail_airfoil, reference_point=self.position.point, factor=self.root_chord_h)
+        return ScaledCurve(curve_in=self.horizontal_tail_airfoil, reference_point=self.position.point,
+                           factor=self.root_chord_h, hidden=True)
 
     @Part
     def tip_airfoil_h_untranslated(self):
         return ScaledCurve(curve_in=self.horizontal_tail_airfoil, reference_point=self.position.point,
-                           factor=self.tip_chord_h)
+                           factor=self.tip_chord_h, hidden=True)
 
     @Part
     def tip_airfoil_h_translated(self):
         return TransformedCurve(
             curve_in=self.tip_airfoil_h_untranslated,
             from_position=self.position,
-            to_position=self.position.translate(x=self.tip_le_offset_h,y=self.span_h/2)
+            to_position=self.position.translate(x=self.tip_le_offset_h,y=self.span_h/2),
+            hidden=True
         )
 
     @Part
@@ -116,12 +116,14 @@ class HorizontalTail(GeomBase):
         return TransformedCurve(
             curve_in=self.tip_airfoil_h_untranslated,
             from_position=self.position,
-            to_position=self.position.translate(x=self.tip_le_offset_h,y=self.span_h/-2)
+            to_position=self.position.translate(x=self.tip_le_offset_h,y=self.span_h/-2),
+            hidden=True
         )
 
     @Part
     def horizontal_tail(self):
-        return LoftedSolid(profiles=[self.tip_airfoil_h_translated_mirrored,self.root_airfoil_h, self.tip_airfoil_h_translated],color=[107, 142, 35])
+        return LoftedSolid(profiles=[self.tip_airfoil_h_translated_mirrored, self.root_airfoil_h,
+                                     self.tip_airfoil_h_translated], color=[107, 142, 35])
 
 
 
