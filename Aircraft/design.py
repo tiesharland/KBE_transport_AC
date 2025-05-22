@@ -1,6 +1,12 @@
 from parapy.core import *
 from parapy.geom import *
 from Aircraft.aircraft import Aircraft
+from parapy.exchange.step import STEPWriter
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import openpyxl
+import wx
 
 
 class Design(GeomBase):
@@ -59,8 +65,133 @@ class Design(GeomBase):
                         vertical_airfoil=self.vertical_airfoil, AoA=self.AoA, Nz=self.Nz, Nt=self.Nt, eff_p=self.eff_p,
                         W_OE=self.iteration[0], ld_cr=self.iteration[2])
 
-    @Attribute
-    def stability_margin(self):
-        return self.aircraft.stability_margin
+    @action(label="Create output file", button_label="Click here to create output Excel file")
+    def output(self):
+        # Creation of the output .XLSX file, the required output parameters are appended to the file.
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        excel_path = os.path.join(os.path.dirname(base_dir), "aircraft_outputs.xlsx")
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Output design parameters"
+        ws.append(["Parameter", "Value", "Unit"])
+        ws.append(["Number of 463L master pallet crates", self.num_crates, "-"])
+        ws.append(["Number of Humvee 1151 vehicles", self.num_vehicles, "-"])
+        ws.append(["Number of airborne personnel", self.num_persons, "-"])
+        ws.append(["Range", self.R, "m"])
+        ws.append(["Take-off distance", self.s_to, "m"])
+        ws.append(["Landing distance", self.s_landing, "m"])
+        ws.append(["Cruise altitude", self.h_cr, "m"])
+        ws.append(["Cruise velocity", self.V_cr, "m/s"])
+        ws.append(["Wing aspect ratio", self.A, "-"])
+        ws.append(["Wing root airfoil", self.airfoil_name_root, "-"])
+        ws.append(["Wing tip airfoil", self.airfoil_name_tip, "-"])
+        ws.append(["Number of engines", self.N_engines, "-"])
+        ws.append(["Wing position", self.root_le, "x/length_fuselage"])
+        ws.append(["Horizontal tail thickness ratio", self.aircraft.horizontal_airfoil, "t/c_h_root"])
+        ws.append(["Vertical tail thickness ratio", self.aircraft.vertical_airfoil, "t/c_v_root"])
+        ws.append(["Cruise angle of attack", self.AoA, "deg"])
+        ws.append(["Ultimate design load factor", self.Nz, "-"])
+        ws.append(["Number of fuel tanks", self.Nt, "-"])
+        ws.append(["Design propulsive efficiency", self.eff_p, "-"])
+        ws.append([])
+        ws.append(["Class I weight estimation", "", ""])
+        ws.append(["Operative Empty Weight (OEW)", self.aircraft.class1.oew, 'kg'])
+        ws.append(["Take-Off Weight (TOW)", self.aircraft.class1.wto, 'kg'])
+        ws.append(["Fuel weight (Wf)", self.aircraft.class1.wfuel, 'kg'])
+        ws.append([])
+        ws.append(["Class II weight estimation", "", ""])
+        ws.append(["Wing weight", self.aircraft.wing.class2_weight, "kg"])
+        ws.append(["Fuselage weight", self.aircraft.fuselage.class2_weight, "kg"])
+        ws.append(["Engine weight", self.aircraft.propulsion.class2_weight, "kg"])
+        ws.append(["Horizontal tail weight", self.aircraft.horizontaltail.class2_weight, "kg"])
+        ws.append(["Vertical tail weight", self.aircraft.verticaltail.class2_weight, "kg"])
+        ws.append(["Fuel tank weight", self.aircraft.wing.fueltank.class2_weight, "kg"])
+        ws.append([])
+        ws.append(["Longitudinal Static Stability", "", ""])
+        ws.append(["Tailless center of gravity", self.aircraft.cg_tail_off, "m"])
+        ws.append(["Total center of gravity", self.aircraft.cg_total, "m"])
+        ws.append(["Stability margin", self.aircraft.stability_margin, "m"])
+        wb.save(excel_path)
+        print(f"Output file created in {excel_path}")
+
+    @action(label="Plot loading diagram", button_label="Click here to plot W/S - W/P diagram used in wing sizing")
+    # This allows whether the user wants to visualise the generated W/S vs W/P plot or not
+    def plot_loading_diagram(self):
+        frame = wx.Frame(None, wx.ID_ANY, "W/S - W/P diagram", size=(800, 600))
+        panel = wx.Panel(frame)
+
+        fig, ax = plt.subplots(1, 1)
+        ax.plot(self.aircraft.sizing.take_off[0], self.aircraft.sizing.take_off[1], label='Take-off Constraint', color='blue')
+        ax.axvline(self.aircraft.sizing.stall_speed[0], color='red', linestyle='--',
+                   label=f'Stall (CLmax={self.aircraft.sizing.CL_max[0]})')
+        ax.axvline(self.aircraft.sizing.stall_speed[1], color='orange', linestyle='--',
+                   label=f'Stall (CLmax={self.aircraft.sizing.CL_max[1]})')
+        ax.axvline(self.aircraft.sizing.stall_speed[2], color='purple', linestyle='--',
+                   label=f'Stall (CLmax={self.aircraft.sizing.CL_max[2]})')
+        ax.axvline(self.aircraft.sizing.landing, color='green', linestyle='--', label='Landing Constraint')
+        ax.plot(self.aircraft.sizing.cruise[0], self.aircraft.sizing.cruise[1], label='Cruise Constraint', color='red')
+        ax.scatter(self.aircraft.sizing.ws_opt, self.aircraft.sizing.wp_opt, marker='*', s=200, color='black')
+        ax.set_xlabel('W/S')
+        ax.set_ylabel('W/P')
+        ax.set_title('Constraint Diagram')
+        ax.set_ylim(0, 0.4)
+        ax.grid(True)
+        ax.legend()
+
+        # print(f"Optimal W/S ={self.sizing.ws_opt}")
+        # print(f"Optimal W/P ={self.sizing.wp_opt}")
+
+        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+        canvas = FigureCanvas(panel, -1, fig)  # Directly attach to the existing panel
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(canvas, 1, wx.EXPAND)
+        panel.SetSizer(sizer)
+
+        # Properly destroy the frame when closing
+        frame.Bind(wx.EVT_CLOSE, self.on_close_frame)
+        frame.Show()
+
+    @action(label="Plot payload-range diagram", button_label="Click here to plot PL-R diagram")
+    def plot_payloadrange_diagram(self):
+        w_pl_max_fuel = max(0, self.aircraft.class1.wto - self.aircraft.class1.oew - self.aircraft.wing.fueltank.max_fuel_weight)
+        mff = ((self.aircraft.class1.b + self.aircraft.class1.w_crew + w_pl_max_fuel * 9.80655) / self.aircraft.class1.wto / 9.80655
+               + self.aircraft.class1.a + self.aircraft.class1.Mtfo)
+        ffs = self.aircraft.class1.ff1 * self.aircraft.class1.ff2 * self.aircraft.class1.ff3 * self.aircraft.class1.ff4 * self.aircraft.class1.ff7 * self.aircraft.class1.ff8
+        range_pl_max_fuel = self.aircraft.class1.eff_p / 9.80655 / self.aircraft.class1.cp * self.aircraft.class1.ld_cr * np.exp(ffs / mff)
+
+        A = [0, self.aircraft.class1.w_payload / 9.80655]
+        B = [self.aircraft.class1.R, self.aircraft.class1.w_payload / 9.80655]
+        C = [range_pl_max_fuel, w_pl_max_fuel]
+        D = [self.aircraft.class1.max_range, 0]
+
+        frame = wx.Frame(None, wx.ID_ANY, "W/S - W/P diagram", size=(800, 600))
+        panel = wx.Panel(frame)
+
+        fig, ax = plt.subplots(1, 1)
+        ax.plot([l[0] for l in (A, B, C, D)], [l[1] for l in (A, B, C, D)])
+        ax.grid(True)
+        ax.set_xlabel('Range [m]')
+        ax.set_ylabel('Payload weight [kg]')
+        ax.set_title('Payload-Range Diagram')
+        # ax.set_xlim(0, self.class1.max_range)
+        # ax.set_ylim(0, self.class1.w_payload / 9.80655)
+
+        from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+        canvas = FigureCanvas(panel, -1, fig)  # Directly attach to the existing panel
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(canvas, 1, wx.EXPAND)
+        panel.SetSizer(sizer)
+
+        # Properly destroy the frame when closing
+        frame.Bind(wx.EVT_CLOSE, self.on_close_frame)
+        frame.Show()
+
+    # @action(label='Analyse stability margin', button_label="Click here to analyse stability margin")
+    # def analyze_stability_margin(self):
+    #     stab_mar = self.stability_margin
+
+    def on_close_frame(self, event):
+        frame = event.GetEventObject()
+        frame.Destroy()  # Properly destroy the frame and clean up
 
 
